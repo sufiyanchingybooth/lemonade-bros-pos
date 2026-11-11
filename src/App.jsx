@@ -5,34 +5,20 @@ import {
   Unlock,
   Plus,
   Minus,
-  CheckCircle2,
   Trash2,
-  DollarSign,
-  TrendingUp,
-  Users,
-  ClipboardList,
   Download,
-  RotateCcw,
   Volume2,
   VolumeX,
-  FileSpreadsheet,
   AlertCircle,
   Tag,
   Receipt,
   UserCheck,
   Undo2,
-  Share2,
-  Check,
   Smartphone,
-  Tablet,
   Sparkles,
-  ArrowRight,
-  ShieldCheck,
   Globe,
-  HelpCircle,
-  Copy,
-  ExternalLink,
-  Upload
+  Save,
+  Check
 } from 'lucide-react';
 
 // ============================================================================
@@ -78,25 +64,25 @@ const PRODUCTS = [
   }
 ];
 
-// All 17 Team Members (including Choice & Aju)
+// All 17 Team Members with category (Men / Women / Kids)
 const INITIAL_TEAM = [
-  { id: 'tm-1', name: 'Soofi', role: 'Owner & Lead', shirtSize: 'L', shirtStatus: 'Ready', phone: '', notes: 'Owner - Ulduz Pvt Ltd & The Lemonade Bros' },
-  { id: 'tm-choice', name: 'Choice', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
-  { id: 'tm-aju', name: 'Aju', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
-  { id: 'tm-2', name: 'Nikku', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
-  { id: 'tm-3', name: 'Muhanti', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
-  { id: 'tm-4', name: 'Nabaa', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
-  { id: 'tm-5', name: 'Chehche', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
-  { id: 'tm-6', name: 'Tara', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
-  { id: 'tm-7', name: 'Chubby', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
-  { id: 'tm-8', name: 'Aril', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
-  { id: 'tm-9', name: 'Ufu', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
-  { id: 'tm-10', name: 'Noddy', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
-  { id: 'tm-11', name: 'Xee', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
-  { id: 'tm-12', name: 'Rushdan', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
-  { id: 'tm-13', name: 'Kiah', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
-  { id: 'tm-14', name: 'Amna', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
-  { id: 'tm-15', name: 'Faya', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-1', name: 'Soofi', role: 'Owner & Lead', category: 'Men', shirtSize: 'L', shirtStatus: 'Ready', phone: '', notes: 'Owner - Ulduz Pvt Ltd & The Lemonade Bros' },
+  { id: 'tm-choice', name: 'Choice', role: 'Till, Pouring & Vibe', category: 'Men', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-aju', name: 'Aju', role: 'Till, Pouring & Vibe', category: 'Men', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-2', name: 'Nikku', role: 'Till, Pouring & Vibe', category: 'Men', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-3', name: 'Muhanti', role: 'Till, Pouring & Vibe', category: 'Men', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-4', name: 'Nabaa', role: 'Till, Pouring & Vibe', category: 'Women', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-5', name: 'Chehche', role: 'Till, Pouring & Vibe', category: 'Women', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-6', name: 'Tara', role: 'Till, Pouring & Vibe', category: 'Women', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-7', name: 'Chubby', role: 'Till, Pouring & Vibe', category: 'Men', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-8', name: 'Aril', role: 'Till, Pouring & Vibe', category: 'Men', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-9', name: 'Ufu', role: 'Till, Pouring & Vibe', category: 'Women', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-10', name: 'Noddy', role: 'Till, Pouring & Vibe', category: 'Men', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-11', name: 'Xee', role: 'Till, Pouring & Vibe', category: 'Women', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-12', name: 'Rushdan', role: 'Till, Pouring & Vibe', category: 'Men', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-13', name: 'Kiah', role: 'Till, Pouring & Vibe', category: 'Women', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-14', name: 'Amna', role: 'Till, Pouring & Vibe', category: 'Women', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-15', name: 'Faya', role: 'Till, Pouring & Vibe', category: 'Men', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
 ];
 
 // Pre-Prepared Expense Sheet (Capped under MVR 5,000)
@@ -134,6 +120,10 @@ export default function App() {
   const [toastMessage, setToastMessage] = useState(null);
   const [showDeployModal, setShowDeployModal] = useState(false);
 
+  // Unsaved changes indicators
+  const [teamSavedFlash, setTeamSavedFlash] = useState(false);
+  const [expensesSavedFlash, setExpensesSavedFlash] = useState(false);
+
   const [cart, setCart] = useState({
     limeade: 0,
     lemonade: 0,
@@ -154,14 +144,18 @@ export default function App() {
       const saved = localStorage.getItem('tlb_team_v2');
       if (saved) {
         const parsed = JSON.parse(saved);
-        const migrated = parsed.map(m => m.name === 'Sufiyan' ? { ...m, name: 'Soofi' } : m);
+        const migrated = parsed.map(m => ({
+          ...m,
+          name: m.name === 'Sufiyan' ? 'Soofi' : m.name,
+          category: m.category || 'Men'
+        }));
         const names = migrated.map(m => m.name.toLowerCase());
         let updated = [...migrated];
         if (!names.includes('choice')) {
-          updated.splice(1, 0, { id: 'tm-choice', name: 'Choice', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' });
+          updated.splice(1, 0, { id: 'tm-choice', name: 'Choice', role: 'Till, Pouring & Vibe', category: 'Men', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' });
         }
         if (!names.includes('aju')) {
-          updated.splice(2, 0, { id: 'tm-aju', name: 'Aju', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' });
+          updated.splice(2, 0, { id: 'tm-aju', name: 'Aju', role: 'Till, Pouring & Vibe', category: 'Men', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' });
         }
         return updated;
       }
@@ -180,6 +174,33 @@ export default function App() {
     }
   });
 
+  // Explicit Save Handlers for Backend Tabs
+  const handleSaveTeam = () => {
+    try {
+      localStorage.setItem('tlb_team_v2', JSON.stringify(team));
+      setTeamSavedFlash(true);
+      notify("Team & T-Shirt Changes Saved!");
+      playSound(780, 0.08);
+      setTimeout(() => setTeamSavedFlash(false), 2500);
+    } catch (e) {
+      console.error(e);
+      notify("Failed to save changes!");
+    }
+  };
+
+  const handleSaveExpenses = () => {
+    try {
+      localStorage.setItem('tlb_expenses_v2', JSON.stringify(expenses));
+      setExpensesSavedFlash(true);
+      notify("Expenses & Budget Sheet Saved!");
+      playSound(780, 0.08);
+      setTimeout(() => setExpensesSavedFlash(false), 2500);
+    } catch (e) {
+      console.error(e);
+      notify("Failed to save changes!");
+    }
+  };
+
   useEffect(() => {
     try {
       localStorage.setItem('tlb_sales_v2', JSON.stringify(sales));
@@ -188,6 +209,7 @@ export default function App() {
     }
   }, [sales]);
 
+  // Keep auto-backup active in case user navigates away
   useEffect(() => {
     try {
       localStorage.setItem('tlb_team_v2', JSON.stringify(team));
@@ -394,11 +416,35 @@ export default function App() {
   };
 
   const shirtSummary = useMemo(() => {
-    const counts = {};
+    const counts = {
+      overall: {},
+      men: {},
+      women: {},
+      kids: {},
+      totals: { Men: 0, Women: 0, Kids: 0, Total: 0 }
+    };
+
     team.forEach(m => {
+      const cat = (m.category || 'Men').toLowerCase();
       const sz = m.shirtSize || 'Pending';
-      counts[sz] = (counts[sz] || 0) + 1;
+
+      // Overall tally
+      counts.overall[sz] = (counts.overall[sz] || 0) + 1;
+
+      // Grouped tally
+      if (cat === 'women') {
+        counts.women[sz] = (counts.women[sz] || 0) + 1;
+        counts.totals.Women += 1;
+      } else if (cat === 'kids') {
+        counts.kids[sz] = (counts.kids[sz] || 0) + 1;
+        counts.totals.Kids += 1;
+      } else {
+        counts.men[sz] = (counts.men[sz] || 0) + 1;
+        counts.totals.Men += 1;
+      }
+      counts.totals.Total += 1;
     });
+
     return counts;
   }, [team]);
 
@@ -982,25 +1028,39 @@ export default function App() {
                     Total expenses strictly capped under MVR 5,000 (Stall is free via Dhiraagu)
                   </p>
                 </div>
-                <button
-                  onClick={() => {
-                    const newExp = {
-                      id: 'exp-' + Date.now(),
-                      title: 'New Expense Item',
-                      category: 'General',
-                      vendor: '',
-                      qty: '1',
-                      amount: 0,
-                      status: 'Pending',
-                      notes: ''
-                    };
-                    setExpenses([...expenses, newExp]);
-                  }}
-                  className="px-3 py-1.5 rounded-xl bg-yellow-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 self-start sm:self-auto"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>Add Expense</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      const newExp = {
+                        id: 'exp-' + Date.now(),
+                        title: 'New Expense Item',
+                        category: 'General',
+                        vendor: '',
+                        qty: '1',
+                        amount: 0,
+                        status: 'Pending',
+                        notes: ''
+                      };
+                      setExpenses([...expenses, newExp]);
+                    }}
+                    className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center gap-1.5"
+                  >
+                    <Plus className="w-3.5 h-3.5 text-yellow-400" />
+                    <span>Add Expense</span>
+                  </button>
+
+                  <button
+                    onClick={handleSaveExpenses}
+                    className={`px-4 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 shadow-md transition-all ${
+                      expensesSavedFlash
+                        ? 'bg-emerald-500 text-slate-950 scale-105'
+                        : 'bg-yellow-400 text-slate-950 hover:bg-yellow-300'
+                    }`}
+                  >
+                    {expensesSavedFlash ? <Check className="w-4 h-4 stroke-[3]" /> : <Save className="w-4 h-4" />}
+                    <span>{expensesSavedFlash ? 'Saved!' : 'Save Sheet'}</span>
+                  </button>
+                </div>
               </div>
 
               {/* Editable Expenses Table */}
@@ -1090,87 +1150,296 @@ export default function App() {
                 </table>
               </div>
 
-              {/* Total Expenses Footer */}
-              <div className="flex justify-between items-center p-3 rounded-2xl bg-slate-950 border border-slate-800">
-                <span className="font-bold text-xs text-slate-400">Total Logged Operational Costs:</span>
-                <span className={`font-mono font-black text-sm ${metrics.totalExpenses > EXPENSE_CAP ? 'text-rose-400' : 'text-emerald-400'}`}>
-                  MVR {metrics.totalExpenses.toLocaleString()} / MVR {EXPENSE_CAP.toLocaleString()}
-                </span>
+              {/* Total Expenses Footer & Save Button */}
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-3 p-3.5 rounded-2xl bg-slate-950 border border-slate-800">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-xs text-slate-400">Total Logged Operational Costs:</span>
+                  <span className={`font-mono font-black text-sm ${metrics.totalExpenses > EXPENSE_CAP ? 'text-rose-400' : 'text-emerald-400'}`}>
+                    MVR {metrics.totalExpenses.toLocaleString()} / MVR {EXPENSE_CAP.toLocaleString()}
+                  </span>
+                </div>
+
+                <button
+                  onClick={handleSaveExpenses}
+                  className={`w-full sm:w-auto px-5 py-2 rounded-xl text-xs font-black flex items-center justify-center gap-2 shadow-lg transition-all ${
+                    expensesSavedFlash
+                      ? 'bg-emerald-500 text-slate-950'
+                      : 'bg-yellow-400 hover:bg-yellow-300 text-slate-950'
+                  }`}
+                >
+                  {expensesSavedFlash ? <Check className="w-4 h-4 stroke-[3]" /> : <Save className="w-4 h-4" />}
+                  <span>{expensesSavedFlash ? 'Changes Saved To Storage!' : 'Save All Expense Changes'}</span>
+                </button>
               </div>
             </div>
           )}
 
-          {/* TAB 3: TEAM & T-SHIRTS (17 MEMBERS) */}
+          {/* TAB 3: TEAM & T-SHIRTS (MEN / WOMEN / KIDS SECTIONS) */}
           {adminSubTab === 'team' && (
             <div className="space-y-4">
-              {/* T-Shirt Tally Cards */}
-              <div className="bg-slate-900 border border-slate-800 p-4 rounded-3xl">
-                <h3 className="font-bold text-sm text-white mb-2">T-Shirt Printing Order Summary</h3>
-                <div className="flex flex-wrap gap-2">
-                  {Object.entries(shirtSummary).map(([size, count]) => (
-                    <div key={size} className="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs">
-                      <span className="text-slate-400 mr-1.5">{size}:</span>
-                      <span className="font-mono font-black text-yellow-400">{count} pcs</span>
+              {/* T-Shirt Tally Cards: Categorized by Men, Women & Kids */}
+              <div className="bg-slate-900 border border-slate-800 p-4 rounded-3xl space-y-3">
+                <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                  <h3 className="font-bold text-sm text-white">T-Shirt Printing Order Summary</h3>
+                  <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
+                    <span>👨 Men: <strong className="text-white">{shirtSummary.totals.Men}</strong></span>
+                    <span>•</span>
+                    <span>👩 Women: <strong className="text-white">{shirtSummary.totals.Women}</strong></span>
+                    <span>•</span>
+                    <span>🧒 Kids: <strong className="text-white">{shirtSummary.totals.Kids}</strong></span>
+                    <span>•</span>
+                    <span>Total: <strong className="text-yellow-400">{shirtSummary.totals.Total} pcs</strong></span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {/* Men's Breakdown */}
+                  <div className="bg-slate-950/70 p-3 rounded-2xl border border-slate-800/80">
+                    <span className="text-[11px] font-bold text-sky-400 uppercase tracking-wider block mb-1.5">
+                      👨 Men ({shirtSummary.totals.Men})
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {Object.keys(shirtSummary.men).length === 0 ? (
+                        <span className="text-[11px] text-slate-500 italic">None</span>
+                      ) : (
+                        Object.entries(shirtSummary.men).map(([sz, cnt]) => (
+                          <span key={sz} className="px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-800 text-[11px]">
+                            {sz}: <strong className="text-yellow-400 font-mono">{cnt}</strong>
+                          </span>
+                        ))
+                      )}
                     </div>
-                  ))}
+                  </div>
+
+                  {/* Women's Breakdown */}
+                  <div className="bg-slate-950/70 p-3 rounded-2xl border border-slate-800/80">
+                    <span className="text-[11px] font-bold text-pink-400 uppercase tracking-wider block mb-1.5">
+                      👩 Women ({shirtSummary.totals.Women})
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {Object.keys(shirtSummary.women).length === 0 ? (
+                        <span className="text-[11px] text-slate-500 italic">None</span>
+                      ) : (
+                        Object.entries(shirtSummary.women).map(([sz, cnt]) => (
+                          <span key={sz} className="px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-800 text-[11px]">
+                            {sz}: <strong className="text-yellow-400 font-mono">{cnt}</strong>
+                          </span>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Kids' Breakdown */}
+                  <div className="bg-slate-950/70 p-3 rounded-2xl border border-slate-800/80">
+                    <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider block mb-1.5">
+                      🧒 Kids ({shirtSummary.totals.Kids})
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {Object.keys(shirtSummary.kids).length === 0 ? (
+                        <span className="text-[11px] text-slate-500 italic">None</span>
+                      ) : (
+                        Object.entries(shirtSummary.kids).map(([sz, cnt]) => (
+                          <span key={sz} className="px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-800 text-[11px]">
+                            {sz}: <strong className="text-yellow-400 font-mono">{cnt}</strong>
+                          </span>
+                        ))
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
 
               {/* Team Table */}
-              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-5 overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead>
-                    <tr className="border-b border-slate-800 text-slate-400 uppercase tracking-wider font-mono">
-                      <th className="py-2.5 px-2">Name</th>
-                      <th className="py-2.5 px-2">Role & Station</th>
-                      <th className="py-2.5 px-2">Shirt Size</th>
-                      <th className="py-2.5 px-2">Notes</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-800/60">
-                    {team.map((member) => (
-                      <tr key={member.id} className="hover:bg-slate-800/30">
-                        <td className="py-2.5 px-2 font-bold text-white whitespace-nowrap">
-                          {member.name}
-                        </td>
-                        <td className="py-2.5 px-2 text-slate-400">
-                          {member.role}
-                        </td>
-                        <td className="py-2.5 px-2">
-                          <select
-                            value={member.shirtSize || 'Pending'}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setTeam(team.map(m => m.id === member.id ? { ...m, shirtSize: val } : m));
-                            }}
-                            className="bg-slate-950 text-yellow-400 font-bold border border-slate-800 rounded px-2 py-1 outline-none"
-                          >
-                            <option value="Pending">Pending</option>
-                            <option value="XS">XS</option>
-                            <option value="S">S</option>
-                            <option value="M">M</option>
-                            <option value="L">L</option>
-                            <option value="XL">XL</option>
-                            <option value="2XL">2XL</option>
-                            <option value="3XL">3XL</option>
-                          </select>
-                        </td>
-                        <td className="py-2.5 px-2">
-                          <input
-                            type="text"
-                            placeholder="Add notes..."
-                            value={member.notes || ''}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setTeam(team.map(m => m.id === member.id ? { ...m, notes: val } : m));
-                            }}
-                            className="bg-transparent text-slate-400 w-full outline-none"
-                          />
-                        </td>
+              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-5 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+                  <div>
+                    <h3 className="font-bold text-base text-white">Team Roster & T-Shirt Sizes</h3>
+                    <p className="text-xs text-slate-400">
+                      Configure sections (Men / Women / Kids), shirt sizes, roles and notes
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        const newMember = {
+                          id: 'tm-' + Date.now(),
+                          name: 'New Member',
+                          role: 'Till, Pouring & Vibe',
+                          category: 'Men',
+                          shirtSize: 'Pending',
+                          shirtStatus: 'Pending',
+                          phone: '',
+                          notes: ''
+                        };
+                        setTeam([...team, newMember]);
+                      }}
+                      className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center gap-1.5"
+                    >
+                      <Plus className="w-3.5 h-3.5 text-yellow-400" />
+                      <span>Add Member</span>
+                    </button>
+
+                    <button
+                      onClick={handleSaveTeam}
+                      className={`px-4 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 shadow-md transition-all ${
+                        teamSavedFlash
+                          ? 'bg-emerald-500 text-slate-950 scale-105'
+                          : 'bg-yellow-400 text-slate-950 hover:bg-yellow-300'
+                      }`}
+                    >
+                      {teamSavedFlash ? <Check className="w-4 h-4 stroke-[3]" /> : <Save className="w-4 h-4" />}
+                      <span>{teamSavedFlash ? 'Saved!' : 'Save Team'}</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-800 text-slate-400 uppercase tracking-wider font-mono">
+                        <th className="py-2.5 px-2">Name</th>
+                        <th className="py-2.5 px-2">Section</th>
+                        <th className="py-2.5 px-2">Role & Station</th>
+                        <th className="py-2.5 px-2">Shirt Size</th>
+                        <th className="py-2.5 px-2">Notes</th>
+                        <th className="py-2.5 px-2 text-right">Action</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-slate-800/60">
+                      {team.map((member) => (
+                        <tr key={member.id} className="hover:bg-slate-800/30">
+                          <td className="py-2.5 px-2 font-bold text-white whitespace-nowrap">
+                            <input
+                              type="text"
+                              value={member.name}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setTeam(team.map(m => m.id === member.id ? { ...m, name: val } : m));
+                              }}
+                              className="bg-transparent border-b border-transparent focus:border-yellow-400 font-bold text-white outline-none w-28 sm:w-36"
+                            />
+                          </td>
+
+                          {/* Men / Women / Kids Selector */}
+                          <td className="py-2.5 px-2">
+                            <select
+                              value={member.category || 'Men'}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setTeam(team.map(m => m.id === member.id ? { ...m, category: val } : m));
+                              }}
+                              className={`font-bold border rounded-lg px-2 py-1 outline-none text-xs ${
+                                member.category === 'Women'
+                                  ? 'bg-pink-950/40 text-pink-300 border-pink-700/60'
+                                  : member.category === 'Kids'
+                                  ? 'bg-amber-950/40 text-amber-300 border-amber-700/60'
+                                  : 'bg-sky-950/40 text-sky-300 border-sky-700/60'
+                              }`}
+                            >
+                              <option value="Men" className="bg-slate-900 text-white">👨 Men</option>
+                              <option value="Women" className="bg-slate-900 text-white">👩 Women</option>
+                              <option value="Kids" className="bg-slate-900 text-white">🧒 Kids</option>
+                            </select>
+                          </td>
+
+                          <td className="py-2.5 px-2 text-slate-400">
+                            <input
+                              type="text"
+                              value={member.role || ''}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setTeam(team.map(m => m.id === member.id ? { ...m, role: val } : m));
+                              }}
+                              className="bg-transparent border-b border-transparent focus:border-yellow-400 text-slate-300 outline-none w-32 sm:w-44"
+                            />
+                          </td>
+
+                          {/* Shirt Size Options (Extended for Kids & Adults) */}
+                          <td className="py-2.5 px-2">
+                            <select
+                              value={member.shirtSize || 'Pending'}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setTeam(team.map(m => m.id === member.id ? { ...m, shirtSize: val } : m));
+                              }}
+                              className="bg-slate-950 text-yellow-400 font-bold border border-slate-800 rounded px-2 py-1 outline-none"
+                            >
+                              <option value="Pending">Pending</option>
+                              {member.category === 'Kids' ? (
+                                <>
+                                  <option value="Kids 4">Kids 4</option>
+                                  <option value="Kids 6">Kids 6</option>
+                                  <option value="Kids 8">Kids 8</option>
+                                  <option value="Kids 10">Kids 10</option>
+                                  <option value="Kids 12">Kids 12</option>
+                                  <option value="Kids 14">Kids 14</option>
+                                </>
+                              ) : (
+                                <>
+                                  <option value="XS">XS</option>
+                                  <option value="S">S</option>
+                                  <option value="M">M</option>
+                                  <option value="L">L</option>
+                                  <option value="XL">XL</option>
+                                  <option value="2XL">2XL</option>
+                                  <option value="3XL">3XL</option>
+                                </>
+                              )}
+                            </select>
+                          </td>
+
+                          <td className="py-2.5 px-2">
+                            <input
+                              type="text"
+                              placeholder="Add notes..."
+                              value={member.notes || ''}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setTeam(team.map(m => m.id === member.id ? { ...m, notes: val } : m));
+                              }}
+                              className="bg-transparent text-slate-400 w-full outline-none"
+                            />
+                          </td>
+
+                          <td className="py-2.5 px-2 text-right">
+                            {member.name !== 'Soofi' && (
+                              <button
+                                onClick={() => {
+                                  if (window.confirm(`Remove ${member.name} from the team roster?`)) {
+                                    setTeam(team.filter(m => m.id !== member.id));
+                                  }
+                                }}
+                                className="p-1 text-slate-500 hover:text-rose-400"
+                                title="Delete Member"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Bottom Save Bar for Team */}
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-3 border-t border-slate-800">
+                  <span className="text-xs text-slate-400">
+                    Total Crew Members: <strong className="text-white">{team.length}</strong>
+                  </span>
+
+                  <button
+                    onClick={handleSaveTeam}
+                    className={`w-full sm:w-auto px-5 py-2 rounded-xl text-xs font-black flex items-center justify-center gap-2 shadow-lg transition-all ${
+                      teamSavedFlash
+                        ? 'bg-emerald-500 text-slate-950'
+                        : 'bg-yellow-400 hover:bg-yellow-300 text-slate-950'
+                    }`}
+                  >
+                    {teamSavedFlash ? <Check className="w-4 h-4 stroke-[3]" /> : <Save className="w-4 h-4" />}
+                    <span>{teamSavedFlash ? 'Changes Saved To Storage!' : 'Save All Team & Shirt Changes'}</span>
+                  </button>
+                </div>
               </div>
             </div>
           )}
