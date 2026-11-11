@@ -1,25 +1,164 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import {
-  ShoppingBag,
-  Lock,
-  Unlock,
-  Plus,
-  Minus,
-  Trash2,
-  Download,
-  Volume2,
-  VolumeX,
-  AlertCircle,
-  Tag,
-  Receipt,
-  UserCheck,
-  Undo2,
-  Smartphone,
-  Sparkles,
-  Globe,
-  Save,
-  Check
-} from 'lucide-react';
+
+// ============================================================================
+// SELF-CONTAINED SVG ICONS (Prevents React 18 / 19 $$typeof mismatch errors)
+// ============================================================================
+const IconWrapper = ({ children, className = "w-4 h-4" }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    {children}
+  </svg>
+);
+
+const ShoppingBag = ({ className }) => (
+  <IconWrapper className={className}>
+    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+    <path d="M3 6h18" />
+    <path d="M16 10a4 4 0 0 1-8 0" />
+  </IconWrapper>
+);
+
+const Lock = ({ className }) => (
+  <IconWrapper className={className}>
+    <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+  </IconWrapper>
+);
+
+const Unlock = ({ className }) => (
+  <IconWrapper className={className}>
+    <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+    <path d="M7 11V7a5 5 0 0 1 9.9-1" />
+  </IconWrapper>
+);
+
+const Plus = ({ className }) => (
+  <IconWrapper className={className}>
+    <path d="M5 12h14" />
+    <path d="M12 5v14" />
+  </IconWrapper>
+);
+
+const Minus = ({ className }) => (
+  <IconWrapper className={className}>
+    <path d="M5 12h14" />
+  </IconWrapper>
+);
+
+const Trash2 = ({ className }) => (
+  <IconWrapper className={className}>
+    <path d="M3 6h18" />
+    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+    <line x1="10" x2="10" y1="11" y2="17" />
+    <line x1="14" x2="14" y1="11" y2="17" />
+  </IconWrapper>
+);
+
+const Download = ({ className }) => (
+  <IconWrapper className={className}>
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <polyline points="7 10 12 15 17 10" />
+    <line x1="12" x2="12" y1="15" y2="3" />
+  </IconWrapper>
+);
+
+const Volume2 = ({ className }) => (
+  <IconWrapper className={className}>
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+    <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+    <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+  </IconWrapper>
+);
+
+const VolumeX = ({ className }) => (
+  <IconWrapper className={className}>
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+    <line x1="22" x2="16" y1="9" y2="15" />
+    <line x1="16" x2="22" y1="9" y2="15" />
+  </IconWrapper>
+);
+
+const AlertCircle = ({ className }) => (
+  <IconWrapper className={className}>
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" x2="12" y1="8" y2="12" />
+    <line x1="12" x2="12.01" y1="16" y2="16" />
+  </IconWrapper>
+);
+
+const Tag = ({ className }) => (
+  <IconWrapper className={className}>
+    <path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" />
+    <circle cx="7.5" cy="7.5" r=".5" fill="currentColor" />
+  </IconWrapper>
+);
+
+const Receipt = ({ className }) => (
+  <IconWrapper className={className}>
+    <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" />
+    <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
+    <path d="M12 17.5v-11" />
+  </IconWrapper>
+);
+
+const UserCheck = ({ className }) => (
+  <IconWrapper className={className}>
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <polyline points="16 11 18 13 22 9" />
+  </IconWrapper>
+);
+
+const Undo2 = ({ className }) => (
+  <IconWrapper className={className}>
+    <path d="M9 14 4 9l5-5" />
+    <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11" />
+  </IconWrapper>
+);
+
+const Check = ({ className }) => (
+  <IconWrapper className={className}>
+    <path d="M20 6 9 17l-5-5" />
+  </IconWrapper>
+);
+
+const Smartphone = ({ className }) => (
+  <IconWrapper className={className}>
+    <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
+    <path d="M12 18h.01" />
+  </IconWrapper>
+);
+
+const Sparkles = ({ className }) => (
+  <IconWrapper className={className}>
+    <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+  </IconWrapper>
+);
+
+const Globe = ({ className }) => (
+  <IconWrapper className={className}>
+    <circle cx="12" cy="12" r="10" />
+    <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+    <path d="M2 12h20" />
+  </IconWrapper>
+);
+
+const AlertTriangle = ({ className }) => (
+  <IconWrapper className={className}>
+    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
+    <path d="M12 9v4" />
+    <path d="M12 17h.01" />
+  </IconWrapper>
+);
 
 // ============================================================================
 // CONSTANTS & INITIAL DATA FOR ULDUZ PVT LTD / THE LEMONADE BROS
@@ -64,25 +203,25 @@ const PRODUCTS = [
   }
 ];
 
-// All 17 Team Members with category (Men / Women / Kids)
+// All 17 Team Members (including Choice & Aju)
 const INITIAL_TEAM = [
-  { id: 'tm-1', name: 'Soofi', role: 'Owner & Lead', category: 'Men', shirtSize: 'L', shirtStatus: 'Ready', phone: '', notes: 'Owner - Ulduz Pvt Ltd & The Lemonade Bros' },
-  { id: 'tm-choice', name: 'Choice', role: 'Till, Pouring & Vibe', category: 'Men', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
-  { id: 'tm-aju', name: 'Aju', role: 'Till, Pouring & Vibe', category: 'Men', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
-  { id: 'tm-2', name: 'Nikku', role: 'Till, Pouring & Vibe', category: 'Men', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
-  { id: 'tm-3', name: 'Muhanti', role: 'Till, Pouring & Vibe', category: 'Men', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
-  { id: 'tm-4', name: 'Nabaa', role: 'Till, Pouring & Vibe', category: 'Women', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
-  { id: 'tm-5', name: 'Chehche', role: 'Till, Pouring & Vibe', category: 'Women', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
-  { id: 'tm-6', name: 'Tara', role: 'Till, Pouring & Vibe', category: 'Women', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
-  { id: 'tm-7', name: 'Chubby', role: 'Till, Pouring & Vibe', category: 'Men', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
-  { id: 'tm-8', name: 'Aril', role: 'Till, Pouring & Vibe', category: 'Men', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
-  { id: 'tm-9', name: 'Ufu', role: 'Till, Pouring & Vibe', category: 'Women', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
-  { id: 'tm-10', name: 'Noddy', role: 'Till, Pouring & Vibe', category: 'Men', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
-  { id: 'tm-11', name: 'Xee', role: 'Till, Pouring & Vibe', category: 'Women', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
-  { id: 'tm-12', name: 'Rushdan', role: 'Till, Pouring & Vibe', category: 'Men', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
-  { id: 'tm-13', name: 'Kiah', role: 'Till, Pouring & Vibe', category: 'Women', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
-  { id: 'tm-14', name: 'Amna', role: 'Till, Pouring & Vibe', category: 'Women', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
-  { id: 'tm-15', name: 'Faya', role: 'Till, Pouring & Vibe', category: 'Men', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-1', name: 'Soofi', category: 'Men', role: 'Owner & Lead', shirtSize: 'L', shirtStatus: 'Ready', phone: '', notes: 'Owner - Ulduz Pvt Ltd & The Lemonade Bros' },
+  { id: 'tm-choice', name: 'Choice', category: 'Men', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-aju', name: 'Aju', category: 'Men', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-2', name: 'Nikku', category: 'Men', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-3', name: 'Muhanti', category: 'Men', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-4', name: 'Nabaa', category: 'Women', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-5', name: 'Chehche', category: 'Women', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-6', name: 'Tara', category: 'Women', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-7', name: 'Chubby', category: 'Men', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-8', name: 'Aril', category: 'Men', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-9', name: 'Ufu', category: 'Men', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-10', name: 'Noddy', category: 'Men', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-11', name: 'Xee', category: 'Men', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-12', name: 'Rushdan', category: 'Men', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-13', name: 'Kiah', category: 'Women', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-14', name: 'Amna', category: 'Women', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
+  { id: 'tm-15', name: 'Faya', category: 'Men', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' },
 ];
 
 // Pre-Prepared Expense Sheet (Capped under MVR 5,000)
@@ -98,7 +237,11 @@ const INITIAL_EXPENSES = [
   { id: 'exp-9', title: 'Transport to Central Park, Hulhumalé', category: 'Logistics', vendor: '', qty: 'Vehicle trips', amount: 0, status: 'Pending', notes: 'Stall gear & inventory' }
 ];
 
+const ADULT_SIZES = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'];
+const KIDS_SIZES = ['Kids 4', 'Kids 6', 'Kids 8', 'Kids 10', 'Kids 12', 'Kids 14'];
+
 export default function App() {
+  // Support direct portal navigation via query string or state
   const [activeMode, setActiveMode] = useState(() => {
     try {
       const params = new URLSearchParams(window.location.search);
@@ -108,28 +251,37 @@ export default function App() {
     }
   });
 
+  // Backend Sub-tabs: 'overview' | 'expenses' | 'team' | 'sales'
   const [adminSubTab, setAdminSubTab] = useState('overview');
+
+  // Security PIN states
   const [isAdminUnlocked, setIsAdminUnlocked] = useState(false);
   const [showPinModal, setShowPinModal] = useState(false);
   const [enteredPin, setEnteredPin] = useState('');
   const [pinError, setPinError] = useState(false);
 
+  // Custom Delete / Void Confirmation Modal State
+  const [deleteConfirmation, setDeleteConfirmation] = useState({
+    isOpen: false,
+    order: null,
+    isUndoLast: false
+  });
+
+  // Cashier Till active selections
   const [activeCashier, setActiveCashier] = useState('Soofi');
   const [discountApplied, setDiscountApplied] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [toastMessage, setToastMessage] = useState(null);
   const [showDeployModal, setShowDeployModal] = useState(false);
 
-  // Unsaved changes indicators
-  const [teamSavedFlash, setTeamSavedFlash] = useState(false);
-  const [expensesSavedFlash, setExpensesSavedFlash] = useState(false);
-
+  // Current In-Progress Cart
   const [cart, setCart] = useState({
     limeade: 0,
     lemonade: 0,
     strawberry: 0
   });
 
+  // Sales Transactions History (Saved in localStorage)
   const [sales, setSales] = useState(() => {
     try {
       const saved = localStorage.getItem('tlb_sales_v2');
@@ -139,23 +291,26 @@ export default function App() {
     }
   });
 
+  // Team Roster State with Men/Women/Kids categories
   const [team, setTeam] = useState(() => {
     try {
       const saved = localStorage.getItem('tlb_team_v2');
       if (saved) {
         const parsed = JSON.parse(saved);
-        const migrated = parsed.map(m => ({
-          ...m,
-          name: m.name === 'Sufiyan' ? 'Soofi' : m.name,
-          category: m.category || 'Men'
-        }));
+        const migrated = parsed.map(m => {
+          let updatedMember = m.name === 'Sufiyan' ? { ...m, name: 'Soofi' } : m;
+          if (!updatedMember.category) {
+            updatedMember.category = ['Nabaa', 'Chehche', 'Tara', 'Kiah', 'Amna'].includes(updatedMember.name) ? 'Women' : 'Men';
+          }
+          return updatedMember;
+        });
         const names = migrated.map(m => m.name.toLowerCase());
         let updated = [...migrated];
         if (!names.includes('choice')) {
-          updated.splice(1, 0, { id: 'tm-choice', name: 'Choice', role: 'Till, Pouring & Vibe', category: 'Men', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' });
+          updated.splice(1, 0, { id: 'tm-choice', name: 'Choice', category: 'Men', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' });
         }
         if (!names.includes('aju')) {
-          updated.splice(2, 0, { id: 'tm-aju', name: 'Aju', role: 'Till, Pouring & Vibe', category: 'Men', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' });
+          updated.splice(2, 0, { id: 'tm-aju', name: 'Aju', category: 'Men', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' });
         }
         return updated;
       }
@@ -165,6 +320,7 @@ export default function App() {
     }
   });
 
+  // Expenses Sheet State
   const [expenses, setExpenses] = useState(() => {
     try {
       const saved = localStorage.getItem('tlb_expenses_v2');
@@ -174,33 +330,7 @@ export default function App() {
     }
   });
 
-  // Explicit Save Handlers for Backend Tabs
-  const handleSaveTeam = () => {
-    try {
-      localStorage.setItem('tlb_team_v2', JSON.stringify(team));
-      setTeamSavedFlash(true);
-      notify("Team & T-Shirt Changes Saved!");
-      playSound(780, 0.08);
-      setTimeout(() => setTeamSavedFlash(false), 2500);
-    } catch (e) {
-      console.error(e);
-      notify("Failed to save changes!");
-    }
-  };
-
-  const handleSaveExpenses = () => {
-    try {
-      localStorage.setItem('tlb_expenses_v2', JSON.stringify(expenses));
-      setExpensesSavedFlash(true);
-      notify("Expenses & Budget Sheet Saved!");
-      playSound(780, 0.08);
-      setTimeout(() => setExpensesSavedFlash(false), 2500);
-    } catch (e) {
-      console.error(e);
-      notify("Failed to save changes!");
-    }
-  };
-
+  // Sync to localStorage
   useEffect(() => {
     try {
       localStorage.setItem('tlb_sales_v2', JSON.stringify(sales));
@@ -209,7 +339,6 @@ export default function App() {
     }
   }, [sales]);
 
-  // Keep auto-backup active in case user navigates away
   useEffect(() => {
     try {
       localStorage.setItem('tlb_team_v2', JSON.stringify(team));
@@ -226,6 +355,7 @@ export default function App() {
     }
   }, [expenses]);
 
+  // Audio Click Feedback
   const playSound = (freq = 600, duration = 0.05) => {
     if (!soundEnabled) return;
     try {
@@ -246,10 +376,11 @@ export default function App() {
   };
 
   const notify = (msg) => {
-    setToastMessage(msg);
+    setToastMessage(String(msg));
     setTimeout(() => setToastMessage(null), 2500);
   };
 
+  // Cart Quantities & Totals Calculation
   const cartSummary = useMemo(() => {
     let totalCups = 0;
     let totalAmount = 0;
@@ -277,6 +408,7 @@ export default function App() {
     return { totalCups, totalAmount, items };
   }, [cart, discountApplied]);
 
+  // Comprehensive Backend Metrics
   const metrics = useMemo(() => {
     let grossRevenue = 0;
     let totalCupsSold = 0;
@@ -286,21 +418,21 @@ export default function App() {
     const cashierTally = {};
 
     sales.forEach((s) => {
-      grossRevenue += s.grossTotal;
-      totalCupsSold += s.cupsTotal;
-      if (s.paymentMethod === 'Cash') cashRevenue += s.grossTotal;
-      else transferRevenue += s.grossTotal;
+      grossRevenue += Number(s.grossTotal) || 0;
+      totalCupsSold += Number(s.cupsTotal) || 0;
+      if (s.paymentMethod === 'Cash') cashRevenue += Number(s.grossTotal) || 0;
+      else transferRevenue += Number(s.grossTotal) || 0;
 
-      if (s.items) {
+      if (Array.isArray(s.items)) {
         s.items.forEach((it) => {
           if (flavorCounts[it.id] !== undefined) {
-            flavorCounts[it.id] += it.qty;
+            flavorCounts[it.id] += Number(it.qty) || 0;
           }
         });
       }
 
       if (s.cashier) {
-        cashierTally[s.cashier] = (cashierTally[s.cashier] || 0) + s.cupsTotal;
+        cashierTally[s.cashier] = (cashierTally[s.cashier] || 0) + (Number(s.cupsTotal) || 0);
       }
     });
 
@@ -323,6 +455,7 @@ export default function App() {
     };
   }, [sales, expenses]);
 
+  // Cart Increment/Decrement
   const updateCartCup = (productId, delta) => {
     setCart((prev) => {
       const nextVal = Math.max(0, (prev[productId] || 0) + delta);
@@ -336,6 +469,7 @@ export default function App() {
     playSound(350, 0.08);
   };
 
+  // Complete Order
   const handleCheckout = (paymentMethod) => {
     if (cartSummary.totalCups === 0) {
       notify("Please tap at least 1 cup first!");
@@ -361,32 +495,59 @@ export default function App() {
     notify(`Order #${newSale.orderNumber} Logged! (${paymentMethod})`);
   };
 
-  const handleUndoLastSale = () => {
+  // Open confirmation modal for Undoing Last Sale
+  const handlePromptUndoLast = () => {
     if (sales.length === 0) return;
-    const lastSale = sales[0];
-    const confirmed = window.confirm(`Undo Order #${lastSale.orderNumber} (MVR ${lastSale.grossTotal})?`);
-    if (confirmed) {
-      setSales(sales.slice(1));
-      notify(`Reverted Order #${lastSale.orderNumber}`);
-      playSound(320, 0.1);
+    setDeleteConfirmation({
+      isOpen: true,
+      order: sales[0],
+      isUndoLast: true
+    });
+  };
+
+  // Open confirmation modal for Deleting specific sale in Backend
+  const handlePromptDeleteOrder = (order) => {
+    setDeleteConfirmation({
+      isOpen: true,
+      order,
+      isUndoLast: false
+    });
+  };
+
+  // Execute confirmed order deletion
+  const executeDeleteOrder = () => {
+    if (!deleteConfirmation.order) return;
+    const targetOrder = deleteConfirmation.order;
+    setSales(sales.filter(s => s.id !== targetOrder.id));
+    notify(`Deleted Order #${targetOrder.orderNumber} (MVR ${targetOrder.grossTotal})`);
+    playSound(320, 0.1);
+    setDeleteConfirmation({ isOpen: false, order: null, isUndoLast: false });
+  };
+
+  // Auto-Unlock on 4-digit PIN Entry
+  const handlePinInput = (value) => {
+    const sanitized = value.replace(/\D/g, '').slice(0, 4);
+    setEnteredPin(sanitized);
+    setPinError(false);
+
+    if (sanitized.length === 4) {
+      if (sanitized === DEFAULT_PIN) {
+        setIsAdminUnlocked(true);
+        setShowPinModal(false);
+        setActiveMode('admin');
+        setEnteredPin('');
+        setPinError(false);
+        playSound(780, 0.1);
+        notify("Backend Unlocked!");
+      } else {
+        setPinError(true);
+        playSound(250, 0.15);
+        setTimeout(() => setEnteredPin(''), 600);
+      }
     }
   };
 
-  const handlePinUnlock = (e) => {
-    e.preventDefault();
-    if (enteredPin === DEFAULT_PIN) {
-      setIsAdminUnlocked(true);
-      setShowPinModal(false);
-      setActiveMode('admin');
-      setEnteredPin('');
-      setPinError(false);
-      playSound(780, 0.1);
-    } else {
-      setPinError(true);
-      playSound(250, 0.15);
-    }
-  };
-
+  // Export Sales to CSV
   const exportSalesCSV = () => {
     if (sales.length === 0) {
       notify("No sales recorded yet.");
@@ -401,7 +562,7 @@ export default function App() {
       s.discountApplied ? "YES (-10/cup)" : "NO",
       s.cupsTotal,
       s.grossTotal,
-      `"${s.items.map(i => `${i.qty}x ${i.name}`).join('; ')}"`
+      `"${(s.items || []).map(i => `${i.qty}x ${i.name}`).join('; ')}"`
     ]);
 
     const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
@@ -415,38 +576,23 @@ export default function App() {
     notify("Sales exported to CSV!");
   };
 
+  // T-Shirt Size summary calculator categorized by Men, Women & Kids
   const shirtSummary = useMemo(() => {
-    const counts = {
-      overall: {},
-      men: {},
-      women: {},
-      kids: {},
-      totals: { Men: 0, Women: 0, Kids: 0, Total: 0 }
-    };
-
+    const overall = {};
+    const byCategory = { Men: {}, Women: {}, Kids: {} };
     team.forEach(m => {
-      const cat = (m.category || 'Men').toLowerCase();
-      const sz = m.shirtSize || 'Pending';
-
-      // Overall tally
-      counts.overall[sz] = (counts.overall[sz] || 0) + 1;
-
-      // Grouped tally
-      if (cat === 'women') {
-        counts.women[sz] = (counts.women[sz] || 0) + 1;
-        counts.totals.Women += 1;
-      } else if (cat === 'kids') {
-        counts.kids[sz] = (counts.kids[sz] || 0) + 1;
-        counts.totals.Kids += 1;
-      } else {
-        counts.men[sz] = (counts.men[sz] || 0) + 1;
-        counts.totals.Men += 1;
-      }
-      counts.totals.Total += 1;
+      const sz = String(m.shirtSize || 'Pending');
+      const cat = String(m.category || 'Men');
+      overall[sz] = (overall[sz] || 0) + 1;
+      if (!byCategory[cat]) byCategory[cat] = {};
+      byCategory[cat][sz] = (byCategory[cat][sz] || 0) + 1;
     });
-
-    return counts;
+    return { overall, byCategory };
   }, [team]);
+
+  const menTally = Object.entries(shirtSummary.byCategory.Men || {});
+  const womenTally = Object.entries(shirtSummary.byCategory.Women || {});
+  const kidsTally = Object.entries(shirtSummary.byCategory.Kids || {});
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-yellow-400 selection:text-slate-950">
@@ -589,7 +735,7 @@ export default function App() {
 
               {sales.length > 0 && (
                 <button
-                  onClick={handleUndoLastSale}
+                  onClick={handlePromptUndoLast}
                   className="px-2.5 py-1 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs font-bold flex items-center gap-1 transition-colors touch-manipulation"
                   title="Undo the most recent transaction"
                 >
@@ -685,7 +831,7 @@ export default function App() {
                           className={`w-full py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r ${prod.accent} text-slate-950 font-black text-3xl sm:text-4xl shadow-lg active:scale-95 touch-manipulation transition-transform flex items-center justify-center`}
                           aria-label={`Add 1 ${prod.name}`}
                         >
-                          <Plus className="w-8 h-8 stroke-[3.5]" />
+                          <Plus className="w-8 h-8" />
                         </button>
 
                         {/* Quick Controls */}
@@ -1028,7 +1174,18 @@ export default function App() {
                     Total expenses strictly capped under MVR 5,000 (Stall is free via Dhiraagu)
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 self-start sm:self-auto">
+                  <button
+                    onClick={() => {
+                      localStorage.setItem('tlb_expenses_v2', JSON.stringify(expenses));
+                      notify("Expenses Saved Successfully!");
+                      playSound(720, 0.08);
+                    }}
+                    className="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black flex items-center gap-1.5 transition-colors"
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Save Changes</span>
+                  </button>
                   <button
                     onClick={() => {
                       const newExp = {
@@ -1043,22 +1200,10 @@ export default function App() {
                       };
                       setExpenses([...expenses, newExp]);
                     }}
-                    className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center gap-1.5"
+                    className="px-3 py-1.5 rounded-xl bg-yellow-400 text-slate-950 text-xs font-bold flex items-center gap-1.5"
                   >
-                    <Plus className="w-3.5 h-3.5 text-yellow-400" />
+                    <Plus className="w-3.5 h-3.5" />
                     <span>Add Expense</span>
-                  </button>
-
-                  <button
-                    onClick={handleSaveExpenses}
-                    className={`px-4 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 shadow-md transition-all ${
-                      expensesSavedFlash
-                        ? 'bg-emerald-500 text-slate-950 scale-105'
-                        : 'bg-yellow-400 text-slate-950 hover:bg-yellow-300'
-                    }`}
-                  >
-                    {expensesSavedFlash ? <Check className="w-4 h-4 stroke-[3]" /> : <Save className="w-4 h-4" />}
-                    <span>{expensesSavedFlash ? 'Saved!' : 'Save Sheet'}</span>
                   </button>
                 </div>
               </div>
@@ -1151,121 +1296,109 @@ export default function App() {
               </div>
 
               {/* Total Expenses Footer & Save Button */}
-              <div className="flex flex-col sm:flex-row justify-between items-center gap-3 p-3.5 rounded-2xl bg-slate-950 border border-slate-800">
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-3 p-3 rounded-2xl bg-slate-950 border border-slate-800">
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-xs text-slate-400">Total Logged Operational Costs:</span>
                   <span className={`font-mono font-black text-sm ${metrics.totalExpenses > EXPENSE_CAP ? 'text-rose-400' : 'text-emerald-400'}`}>
                     MVR {metrics.totalExpenses.toLocaleString()} / MVR {EXPENSE_CAP.toLocaleString()}
                   </span>
                 </div>
-
                 <button
-                  onClick={handleSaveExpenses}
-                  className={`w-full sm:w-auto px-5 py-2 rounded-xl text-xs font-black flex items-center justify-center gap-2 shadow-lg transition-all ${
-                    expensesSavedFlash
-                      ? 'bg-emerald-500 text-slate-950'
-                      : 'bg-yellow-400 hover:bg-yellow-300 text-slate-950'
-                  }`}
+                  onClick={() => {
+                    localStorage.setItem('tlb_expenses_v2', JSON.stringify(expenses));
+                    notify("Budget & Costs Saved!");
+                    playSound(720, 0.08);
+                  }}
+                  className="w-full sm:w-auto px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black flex items-center justify-center gap-1.5 transition-colors shadow-lg shadow-emerald-500/20"
                 >
-                  {expensesSavedFlash ? <Check className="w-4 h-4 stroke-[3]" /> : <Save className="w-4 h-4" />}
-                  <span>{expensesSavedFlash ? 'Changes Saved To Storage!' : 'Save All Expense Changes'}</span>
+                  <Check className="w-4 h-4" />
+                  <span>Save All Expense Changes</span>
                 </button>
               </div>
             </div>
           )}
 
-          {/* TAB 3: TEAM & T-SHIRTS (MEN / WOMEN / KIDS SECTIONS) */}
+          {/* TAB 3: TEAM & T-SHIRTS (17 MEMBERS - MEN / WOMEN / KIDS) */}
           {adminSubTab === 'team' && (
             <div className="space-y-4">
-              {/* T-Shirt Tally Cards: Categorized by Men, Women & Kids */}
-              <div className="bg-slate-900 border border-slate-800 p-4 rounded-3xl space-y-3">
-                <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                  <h3 className="font-bold text-sm text-white">T-Shirt Printing Order Summary</h3>
-                  <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
-                    <span>👨 Men: <strong className="text-white">{shirtSummary.totals.Men}</strong></span>
-                    <span>•</span>
-                    <span>👩 Women: <strong className="text-white">{shirtSummary.totals.Women}</strong></span>
-                    <span>•</span>
-                    <span>🧒 Kids: <strong className="text-white">{shirtSummary.totals.Kids}</strong></span>
-                    <span>•</span>
-                    <span>Total: <strong className="text-yellow-400">{shirtSummary.totals.Total} pcs</strong></span>
+              {/* Category-wise Breakdown Cards for Print Shops */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="bg-slate-900 border border-slate-800 p-4 rounded-3xl">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-black text-white flex items-center gap-1.5">👨 Men Shirts</span>
+                    <span className="text-xs font-mono font-bold text-yellow-400">
+                      {team.filter(m => (m.category || 'Men') === 'Men').length} pcs
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {menTally.length === 0 ? (
+                      <span className="text-[11px] text-slate-500 italic">None selected</span>
+                    ) : (
+                      menTally.map(([sz, cnt]) => (
+                        <span key={`men-${sz}`} className="px-2 py-0.5 rounded-lg bg-slate-950 border border-slate-800 text-[11px] text-slate-300">
+                          {String(sz)}: <strong className="text-yellow-400">{Number(cnt)}</strong>
+                        </span>
+                      ))
+                    )}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {/* Men's Breakdown */}
-                  <div className="bg-slate-950/70 p-3 rounded-2xl border border-slate-800/80">
-                    <span className="text-[11px] font-bold text-sky-400 uppercase tracking-wider block mb-1.5">
-                      👨 Men ({shirtSummary.totals.Men})
+                <div className="bg-slate-900 border border-slate-800 p-4 rounded-3xl">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-black text-white flex items-center gap-1.5">👩 Women Shirts</span>
+                    <span className="text-xs font-mono font-bold text-yellow-400">
+                      {team.filter(m => m.category === 'Women').length} pcs
                     </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {Object.keys(shirtSummary.men).length === 0 ? (
-                        <span className="text-[11px] text-slate-500 italic">None</span>
-                      ) : (
-                        Object.entries(shirtSummary.men).map(([sz, cnt]) => (
-                          <span key={sz} className="px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-800 text-[11px]">
-                            {sz}: <strong className="text-yellow-400 font-mono">{cnt}</strong>
-                          </span>
-                        ))
-                      )}
-                    </div>
                   </div>
-
-                  {/* Women's Breakdown */}
-                  <div className="bg-slate-950/70 p-3 rounded-2xl border border-slate-800/80">
-                    <span className="text-[11px] font-bold text-pink-400 uppercase tracking-wider block mb-1.5">
-                      👩 Women ({shirtSummary.totals.Women})
-                    </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {Object.keys(shirtSummary.women).length === 0 ? (
-                        <span className="text-[11px] text-slate-500 italic">None</span>
-                      ) : (
-                        Object.entries(shirtSummary.women).map(([sz, cnt]) => (
-                          <span key={sz} className="px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-800 text-[11px]">
-                            {sz}: <strong className="text-yellow-400 font-mono">{cnt}</strong>
-                          </span>
-                        ))
-                      )}
-                    </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {womenTally.length === 0 ? (
+                      <span className="text-[11px] text-slate-500 italic">None selected</span>
+                    ) : (
+                      womenTally.map(([sz, cnt]) => (
+                        <span key={`women-${sz}`} className="px-2 py-0.5 rounded-lg bg-slate-950 border border-slate-800 text-[11px] text-slate-300">
+                          {String(sz)}: <strong className="text-yellow-400">{Number(cnt)}</strong>
+                        </span>
+                      ))
+                    )}
                   </div>
+                </div>
 
-                  {/* Kids' Breakdown */}
-                  <div className="bg-slate-950/70 p-3 rounded-2xl border border-slate-800/80">
-                    <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider block mb-1.5">
-                      🧒 Kids ({shirtSummary.totals.Kids})
+                <div className="bg-slate-900 border border-slate-800 p-4 rounded-3xl">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-black text-white flex items-center gap-1.5">🧒 Kids Shirts</span>
+                    <span className="text-xs font-mono font-bold text-yellow-400">
+                      {team.filter(m => m.category === 'Kids').length} pcs
                     </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {Object.keys(shirtSummary.kids).length === 0 ? (
-                        <span className="text-[11px] text-slate-500 italic">None</span>
-                      ) : (
-                        Object.entries(shirtSummary.kids).map(([sz, cnt]) => (
-                          <span key={sz} className="px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-800 text-[11px]">
-                            {sz}: <strong className="text-yellow-400 font-mono">{cnt}</strong>
-                          </span>
-                        ))
-                      )}
-                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {kidsTally.length === 0 ? (
+                      <span className="text-[11px] text-slate-500 italic">None selected</span>
+                    ) : (
+                      kidsTally.map(([sz, cnt]) => (
+                        <span key={`kids-${sz}`} className="px-2 py-0.5 rounded-lg bg-slate-950 border border-slate-800 text-[11px] text-slate-300">
+                          {String(sz)}: <strong className="text-yellow-400">{Number(cnt)}</strong>
+                        </span>
+                      ))
+                    )}
                   </div>
                 </div>
               </div>
 
-              {/* Team Table */}
-              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-5 space-y-4">
+              {/* Team Table with Men / Women / Kids Selector */}
+              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-5 overflow-x-auto space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
                   <div>
-                    <h3 className="font-bold text-base text-white">Team Roster & T-Shirt Sizes</h3>
-                    <p className="text-xs text-slate-400">
-                      Configure sections (Men / Women / Kids), shirt sizes, roles and notes
-                    </p>
+                    <h3 className="font-bold text-sm text-white">Team Roster & T-Shirt Sizes</h3>
+                    <p className="text-xs text-slate-400">Classify as Men, Women, or Kids for exact apparel cut & fit</p>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 self-start sm:self-auto">
                     <button
                       onClick={() => {
                         const newMember = {
                           id: 'tm-' + Date.now(),
-                          name: 'New Member',
-                          role: 'Till, Pouring & Vibe',
+                          name: 'New Crew',
                           category: 'Men',
+                          role: 'Till, Pouring & Vibe',
                           shirtSize: 'Pending',
                           shirtStatus: 'Pending',
                           phone: '',
@@ -1273,40 +1406,41 @@ export default function App() {
                         };
                         setTeam([...team, newMember]);
                       }}
-                      className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center gap-1.5"
+                      className="px-3 py-1.5 rounded-xl bg-yellow-400 text-slate-950 text-xs font-bold flex items-center gap-1.5"
                     >
-                      <Plus className="w-3.5 h-3.5 text-yellow-400" />
+                      <Plus className="w-3.5 h-3.5" />
                       <span>Add Member</span>
                     </button>
-
                     <button
-                      onClick={handleSaveTeam}
-                      className={`px-4 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 shadow-md transition-all ${
-                        teamSavedFlash
-                          ? 'bg-emerald-500 text-slate-950 scale-105'
-                          : 'bg-yellow-400 text-slate-950 hover:bg-yellow-300'
-                      }`}
+                      onClick={() => {
+                        localStorage.setItem('tlb_team_v2', JSON.stringify(team));
+                        notify("Team Roster & Sizes Saved!");
+                        playSound(720, 0.08);
+                      }}
+                      className="px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black flex items-center gap-1.5 transition-colors shadow-lg shadow-emerald-500/20"
                     >
-                      {teamSavedFlash ? <Check className="w-4 h-4 stroke-[3]" /> : <Save className="w-4 h-4" />}
-                      <span>{teamSavedFlash ? 'Saved!' : 'Save Team'}</span>
+                      <Check className="w-3.5 h-3.5" />
+                      <span>Save Changes</span>
                     </button>
                   </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead>
-                      <tr className="border-b border-slate-800 text-slate-400 uppercase tracking-wider font-mono">
-                        <th className="py-2.5 px-2">Name</th>
-                        <th className="py-2.5 px-2">Section</th>
-                        <th className="py-2.5 px-2">Role & Station</th>
-                        <th className="py-2.5 px-2">Shirt Size</th>
-                        <th className="py-2.5 px-2">Notes</th>
-                        <th className="py-2.5 px-2 text-right">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-800/60">
-                      {team.map((member) => (
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-800 text-slate-400 uppercase tracking-wider font-mono">
+                      <th className="py-2.5 px-2">Name</th>
+                      <th className="py-2.5 px-2">Section</th>
+                      <th className="py-2.5 px-2">Shirt Size</th>
+                      <th className="py-2.5 px-2">Role & Station</th>
+                      <th className="py-2.5 px-2">Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/60">
+                    {team.map((member) => {
+                      const isKids = member.category === 'Kids';
+                      const sizeOptions = isKids ? KIDS_SIZES : ADULT_SIZES;
+
+                      return (
                         <tr key={member.id} className="hover:bg-slate-800/30">
                           <td className="py-2.5 px-2 font-bold text-white whitespace-nowrap">
                             <input
@@ -1316,45 +1450,30 @@ export default function App() {
                                 const val = e.target.value;
                                 setTeam(team.map(m => m.id === member.id ? { ...m, name: val } : m));
                               }}
-                              className="bg-transparent border-b border-transparent focus:border-yellow-400 font-bold text-white outline-none w-28 sm:w-36"
+                              className="bg-transparent border-b border-transparent focus:border-yellow-400 font-bold text-white w-28 outline-none"
                             />
                           </td>
-
-                          {/* Men / Women / Kids Selector */}
                           <td className="py-2.5 px-2">
                             <select
                               value={member.category || 'Men'}
                               onChange={(e) => {
-                                const val = e.target.value;
-                                setTeam(team.map(m => m.id === member.id ? { ...m, category: val } : m));
+                                const newCat = e.target.value;
+                                setTeam(team.map(m => {
+                                  if (m.id !== member.id) return m;
+                                  return {
+                                    ...m,
+                                    category: newCat,
+                                    shirtSize: 'Pending'
+                                  };
+                                }));
                               }}
-                              className={`font-bold border rounded-lg px-2 py-1 outline-none text-xs ${
-                                member.category === 'Women'
-                                  ? 'bg-pink-950/40 text-pink-300 border-pink-700/60'
-                                  : member.category === 'Kids'
-                                  ? 'bg-amber-950/40 text-amber-300 border-amber-700/60'
-                                  : 'bg-sky-950/40 text-sky-300 border-sky-700/60'
-                              }`}
+                              className="bg-slate-950 text-yellow-400 font-bold border border-slate-800 rounded px-2 py-1 outline-none"
                             >
-                              <option value="Men" className="bg-slate-900 text-white">👨 Men</option>
-                              <option value="Women" className="bg-slate-900 text-white">👩 Women</option>
-                              <option value="Kids" className="bg-slate-900 text-white">🧒 Kids</option>
+                              <option value="Men">👨 Men</option>
+                              <option value="Women">👩 Women</option>
+                              <option value="Kids">🧒 Kids</option>
                             </select>
                           </td>
-
-                          <td className="py-2.5 px-2 text-slate-400">
-                            <input
-                              type="text"
-                              value={member.role || ''}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                setTeam(team.map(m => m.id === member.id ? { ...m, role: val } : m));
-                              }}
-                              className="bg-transparent border-b border-transparent focus:border-yellow-400 text-slate-300 outline-none w-32 sm:w-44"
-                            />
-                          </td>
-
-                          {/* Shirt Size Options (Extended for Kids & Adults) */}
                           <td className="py-2.5 px-2">
                             <select
                               value={member.shirtSize || 'Pending'}
@@ -1365,29 +1484,16 @@ export default function App() {
                               className="bg-slate-950 text-yellow-400 font-bold border border-slate-800 rounded px-2 py-1 outline-none"
                             >
                               <option value="Pending">Pending</option>
-                              {member.category === 'Kids' ? (
-                                <>
-                                  <option value="Kids 4">Kids 4</option>
-                                  <option value="Kids 6">Kids 6</option>
-                                  <option value="Kids 8">Kids 8</option>
-                                  <option value="Kids 10">Kids 10</option>
-                                  <option value="Kids 12">Kids 12</option>
-                                  <option value="Kids 14">Kids 14</option>
-                                </>
-                              ) : (
-                                <>
-                                  <option value="XS">XS</option>
-                                  <option value="S">S</option>
-                                  <option value="M">M</option>
-                                  <option value="L">L</option>
-                                  <option value="XL">XL</option>
-                                  <option value="2XL">2XL</option>
-                                  <option value="3XL">3XL</option>
-                                </>
-                              )}
+                              {sizeOptions.map(size => (
+                                <option key={`${member.id}-${size}`} value={size}>
+                                  {size}
+                                </option>
+                              ))}
                             </select>
                           </td>
-
+                          <td className="py-2.5 px-2 text-slate-400">
+                            {member.role}
+                          </td>
                           <td className="py-2.5 px-2">
                             <input
                               type="text"
@@ -1400,44 +1506,24 @@ export default function App() {
                               className="bg-transparent text-slate-400 w-full outline-none"
                             />
                           </td>
-
-                          <td className="py-2.5 px-2 text-right">
-                            {member.name !== 'Soofi' && (
-                              <button
-                                onClick={() => {
-                                  if (window.confirm(`Remove ${member.name} from the team roster?`)) {
-                                    setTeam(team.filter(m => m.id !== member.id));
-                                  }
-                                }}
-                                className="p-1 text-slate-500 hover:text-rose-400"
-                                title="Delete Member"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            )}
-                          </td>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      );
+                    })}
+                  </tbody>
+                </table>
 
-                {/* Bottom Save Bar for Team */}
-                <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-3 border-t border-slate-800">
-                  <span className="text-xs text-slate-400">
-                    Total Crew Members: <strong className="text-white">{team.length}</strong>
-                  </span>
-
+                {/* Save Team Bottom Action */}
+                <div className="pt-2 flex justify-end">
                   <button
-                    onClick={handleSaveTeam}
-                    className={`w-full sm:w-auto px-5 py-2 rounded-xl text-xs font-black flex items-center justify-center gap-2 shadow-lg transition-all ${
-                      teamSavedFlash
-                        ? 'bg-emerald-500 text-slate-950'
-                        : 'bg-yellow-400 hover:bg-yellow-300 text-slate-950'
-                    }`}
+                    onClick={() => {
+                      localStorage.setItem('tlb_team_v2', JSON.stringify(team));
+                      notify("Team & Shirts Saved Successfully!");
+                      playSound(720, 0.08);
+                    }}
+                    className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition-all active:scale-95"
                   >
-                    {teamSavedFlash ? <Check className="w-4 h-4 stroke-[3]" /> : <Save className="w-4 h-4" />}
-                    <span>{teamSavedFlash ? 'Changes Saved To Storage!' : 'Save All Team & Shirt Changes'}</span>
+                    <Check className="w-4 h-4" />
+                    <span>Save Team & Shirt Changes</span>
                   </button>
                 </div>
               </div>
@@ -1483,11 +1569,7 @@ export default function App() {
                           <td className="py-2 px-2 font-mono font-black text-yellow-400">MVR {s.grossTotal}</td>
                           <td className="py-2 px-2 text-right">
                             <button
-                              onClick={() => {
-                                if (window.confirm(`Delete Order #${s.orderNumber}?`)) {
-                                  setSales(sales.filter(i => i.id !== s.id));
-                                }
-                              }}
+                              onClick={() => handlePromptDeleteOrder(s)}
                               className="text-slate-500 hover:text-rose-400"
                               title="Delete Transaction"
                             >
@@ -1505,50 +1587,111 @@ export default function App() {
         </main>
       )}
 
-      {/* Password Modal (PIN: 1234) */}
+      {/* Password Modal (PIN: 1234 - Auto Unlocks on typing 1234) */}
       {showPinModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-xs w-full shadow-2xl text-center">
             <div className="w-12 h-12 rounded-2xl bg-yellow-400/10 border border-yellow-400/30 flex items-center justify-center mx-auto text-yellow-400 mb-3">
               <Lock className="w-6 h-6" />
             </div>
             <h3 className="font-black text-lg text-white">Owner Access</h3>
             <p className="text-xs text-slate-400 mt-1">
-              Enter Owner PIN to unlock backend financials and expenses
+              Enter 4-digit PIN to open backend
             </p>
 
-            <form onSubmit={handlePinUnlock} className="mt-4 space-y-3">
+            <div className="mt-5 space-y-3">
               <input
                 type="password"
                 inputMode="numeric"
+                pattern="[0-9]*"
                 autoFocus
+                maxLength={4}
                 placeholder="••••"
                 value={enteredPin}
-                onChange={(e) => {
-                  setEnteredPin(e.target.value);
-                  setPinError(false);
-                }}
-                className={`w-full py-3 text-center text-2xl font-mono tracking-widest bg-slate-950 rounded-2xl border text-white focus:outline-none ${
-                  pinError ? 'border-rose-500' : 'border-slate-800 focus:border-yellow-400'
+                onChange={(e) => handlePinInput(e.target.value)}
+                className={`w-full py-3 text-center text-3xl font-mono tracking-widest bg-slate-950 rounded-2xl border text-yellow-400 focus:outline-none transition-all shadow-inner ${
+                  pinError ? 'border-rose-500 ring-2 ring-rose-500/20' : 'border-slate-800 focus:border-yellow-400'
                 }`}
               />
-              {pinError && <p className="text-xs text-rose-400 font-bold">Incorrect PIN (PIN is 1234)</p>}
-              <div className="flex gap-2">
+              {pinError && (
+                <p className="text-xs text-rose-400 font-bold animate-pulse">
+                  Incorrect PIN. Try again.
+                </p>
+              )}
+
+              <div className="pt-2">
                 <button
                   type="button"
-                  onClick={() => setShowPinModal(false)}
-                  className="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold"
+                  onClick={() => {
+                    setShowPinModal(false);
+                    setEnteredPin('');
+                    setPinError(false);
+                  }}
+                  className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-colors"
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-yellow-400 text-slate-950 text-xs font-black"
-                >
-                  Unlock
-                </button>
               </div>
-            </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Themed Custom Order Delete / Void Confirmation Modal */}
+      {deleteConfirmation.isOpen && deleteConfirmation.order && (
+        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-6 max-w-sm w-full shadow-2xl text-left">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-2xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-400 shrink-0">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-black text-base text-white">
+                  {deleteConfirmation.isUndoLast ? 'Undo Last Order?' : 'Delete Order Record?'}
+                </h3>
+                <p className="text-[11px] text-slate-400">This action will void the transaction</p>
+              </div>
+            </div>
+
+            {/* Order Details Card */}
+            <div className="bg-slate-950 border border-slate-800/90 rounded-2xl p-3.5 my-3 space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-mono font-bold text-yellow-400">Order #{deleteConfirmation.order.orderNumber}</span>
+                <span className="text-slate-400 font-mono">{deleteConfirmation.order.timestamp}</span>
+              </div>
+              <div className="flex items-baseline justify-between pt-1 border-t border-slate-800">
+                <span className="text-xs text-slate-300">
+                  {deleteConfirmation.order.cupsTotal} Cup{deleteConfirmation.order.cupsTotal > 1 ? 's' : ''} ({deleteConfirmation.order.paymentMethod})
+                </span>
+                <span className="text-base font-black font-mono text-yellow-400">
+                  MVR {deleteConfirmation.order.grossTotal}
+                </span>
+              </div>
+              {deleteConfirmation.order.cashier && (
+                <p className="text-[10px] text-slate-500">
+                  Cashier: <strong className="text-slate-400">{deleteConfirmation.order.cashier}</strong>
+                </p>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-2.5 pt-1">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmation({ isOpen: false, order: null, isUndoLast: false })}
+                className="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-colors"
+              >
+                Keep Order
+              </button>
+              <button
+                type="button"
+                onClick={executeDeleteOrder}
+                className="flex-1 py-3 rounded-xl bg-rose-500 hover:bg-rose-400 text-white text-xs font-black shadow-lg shadow-rose-500/20 transition-colors flex items-center justify-center gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Confirm Void</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -1563,8 +1706,8 @@ export default function App() {
                   <Smartphone className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-black text-base sm:text-lg text-white">How to Open on Any Device</h3>
-                  <p className="text-xs text-slate-400">For iPad, iPhone or another browser on race day</p>
+                  <h3 className="font-black text-base sm:text-lg text-white">Shareable Production Link</h3>
+                  <p className="text-xs text-slate-400">For iPad, iPhone or Android on race day</p>
                 </div>
               </div>
               <button
@@ -1576,38 +1719,27 @@ export default function App() {
             </div>
 
             <div className="mt-4 space-y-4 overflow-y-auto pr-1 text-xs sm:text-sm text-slate-300">
-              <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-200">
-                <p className="font-bold mb-1 flex items-center gap-1.5">
-                  <AlertCircle className="w-4 h-4 text-yellow-400 shrink-0" />
-                  Why the copied link failed in a new browser:
-                </p>
-                <p className="text-xs text-amber-200/80 leading-relaxed">
-                  The in-chat preview runs inside a temporary, isolated sandbox. Its URL cannot be opened outside this session without hosting it.
-                </p>
-              </div>
-
-              {/* Option 1: 1-Click Vercel / Netlify Deployment */}
               <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
                 <span className="text-[10px] uppercase font-black tracking-wider text-yellow-400 block">
-                  Method 1 (Recommended — 2 Mins): Deploy to Vercel
+                  Step 1: Use Your Main Vercel Production Domain
                 </span>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  This gives you a permanent, ultra-fast link (e.g. <span className="font-mono text-white">the-lemonade-bros.vercel.app</span>) that any team member can open directly on their phone:
+                  Do not share the long preview link with random characters (like <span className="font-mono text-rose-300">lemonade-bros-3fq1ms43e...</span>) because Vercel locks preview links behind a login screen.
                 </p>
-                <ol className="list-decimal list-inside text-xs space-y-1.5 text-slate-300 font-medium">
-                  <li>In this window, click the <strong className="text-white">Download Code</strong> or copy the full <strong className="text-white">App.jsx</strong> file.</li>
-                  <li>Go to <span className="text-yellow-400 font-mono">v0.dev</span> or push to a quick GitHub repo and import to <span className="text-yellow-400 font-mono">Vercel.com</span> (Free).</li>
-                  <li>Click <strong className="text-white">Deploy</strong>. You will get a live public HTTPS URL immediately for your iPad/phone!</li>
-                </ol>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  Instead, go to your <strong className="text-white">Vercel Project Dashboard → Domains</strong> and copy your clean production link:
+                </p>
+                <div className="p-2.5 rounded-xl bg-slate-900 border border-yellow-400/30 font-mono text-xs text-yellow-300 text-center">
+                  https://lemonade-bros-pos.vercel.app
+                </div>
               </div>
 
-              {/* Option 2: Instant Fullscreen on Current Device */}
               <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
                 <span className="text-[10px] uppercase font-black tracking-wider text-emerald-400 block">
-                  Method 2: Open in New Tab Right Now
+                  Step 2: Add to Phone / iPad Home Screen
                 </span>
                 <p className="text-xs text-slate-400">
-                  In your interface right above this canvas, click the <strong className="text-white">"Open in New Window / Pop-out"</strong> icon (arrow pointing out of a square). That will expand the till into a full, clean browser tab.
+                  Open the production URL in Safari on your iPhone or iPad, tap <strong className="text-white">Share → Add to Home Screen</strong>. It will run fullscreen like a native POS app!
                 </p>
               </div>
             </div>
