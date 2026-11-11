@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 
 // ============================================================================
-// SELF-CONTAINED SVG ICONS (Prevents React 18 / 19 $$typeof mismatch errors)
+// SELF-CONTAINED SVG ICONS
 // ============================================================================
 const IconWrapper = ({ children, className = "w-4 h-4" }) => (
   <svg
@@ -87,14 +87,6 @@ const VolumeX = ({ className }) => (
   </IconWrapper>
 );
 
-const AlertCircle = ({ className }) => (
-  <IconWrapper className={className}>
-    <circle cx="12" cy="12" r="10" />
-    <line x1="12" x2="12" y1="8" y2="12" />
-    <line x1="12" x2="12.01" y1="16" y2="16" />
-  </IconWrapper>
-);
-
 const Tag = ({ className }) => (
   <IconWrapper className={className}>
     <path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" />
@@ -131,24 +123,24 @@ const Check = ({ className }) => (
   </IconWrapper>
 );
 
-const Smartphone = ({ className }) => (
-  <IconWrapper className={className}>
-    <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
-    <path d="M12 18h.01" />
-  </IconWrapper>
-);
-
 const Sparkles = ({ className }) => (
   <IconWrapper className={className}>
     <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
   </IconWrapper>
 );
 
-const Globe = ({ className }) => (
+const Cloud = ({ className }) => (
   <IconWrapper className={className}>
-    <circle cx="12" cy="12" r="10" />
-    <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
-    <path d="M2 12h20" />
+    <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
+  </IconWrapper>
+);
+
+const RefreshCw = ({ className }) => (
+  <IconWrapper className={className}>
+    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+    <path d="M21 3v5h-5" />
+    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+    <path d="M8 16H3v5" />
   </IconWrapper>
 );
 
@@ -169,6 +161,9 @@ const DEFAULT_PIN = "1234";
 const TARGET_CUPS = 2000;
 const EXPENSE_CAP = 5000;
 
+// Shared Cloud Key for Ulduz / The Lemonade Bros so all devices sync
+const CLOUD_SYNC_ENDPOINT = "https://kvdb.io/A6Xy9kLp2mQv8zR4wN1tB7/ulduz_lemonade_bros_2026_v1";
+
 // 3 Signature Drinks: Base 60/60/70 -> Discounted 50/50/60 (-10 MVR per cup)
 const PRODUCTS = [
   {
@@ -179,7 +174,7 @@ const PRODUCTS = [
     discountedPrice: 50,
     accent: 'from-emerald-400 to-lime-500',
     border: 'border-emerald-500/50',
-    desc: 'Fresh Dhivehi lime juice, light cane syrup & chilled ice'
+    desc: 'Fresh Dhivehi lime juice, light cane syrup & ice'
   },
   {
     id: 'lemonade',
@@ -241,7 +236,6 @@ const ADULT_SIZES = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'];
 const KIDS_SIZES = ['Kids 4', 'Kids 6', 'Kids 8', 'Kids 10', 'Kids 12', 'Kids 14'];
 
 export default function App() {
-  // Support direct portal navigation via query string or state
   const [activeMode, setActiveMode] = useState(() => {
     try {
       const params = new URLSearchParams(window.location.search);
@@ -260,6 +254,11 @@ export default function App() {
   const [enteredPin, setEnteredPin] = useState('');
   const [pinError, setPinError] = useState(false);
 
+  // Cloud Sync Status
+  const [syncStatus, setSyncStatus] = useState('synced'); // 'syncing' | 'synced' | 'offline'
+  const lastUpdatedRef = useRef(0);
+  const isDirtyRef = useRef(false);
+
   // Custom Delete / Void Confirmation Modal State
   const [deleteConfirmation, setDeleteConfirmation] = useState({
     isOpen: false,
@@ -272,7 +271,6 @@ export default function App() {
   const [discountApplied, setDiscountApplied] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [toastMessage, setToastMessage] = useState(null);
-  const [showDeployModal, setShowDeployModal] = useState(false);
 
   // Current In-Progress Cart
   const [cart, setCart] = useState({
@@ -281,39 +279,21 @@ export default function App() {
     strawberry: 0
   });
 
-  // Sales Transactions History (Saved in localStorage)
+  // Sales Transactions History
   const [sales, setSales] = useState(() => {
     try {
-      const saved = localStorage.getItem('tlb_sales_v2');
+      const saved = localStorage.getItem('tlb_sales_v3');
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
     }
   });
 
-  // Team Roster State with Men/Women/Kids categories
+  // Team Roster State
   const [team, setTeam] = useState(() => {
     try {
-      const saved = localStorage.getItem('tlb_team_v2');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        const migrated = parsed.map(m => {
-          let updatedMember = m.name === 'Sufiyan' ? { ...m, name: 'Soofi' } : m;
-          if (!updatedMember.category) {
-            updatedMember.category = ['Nabaa', 'Chehche', 'Tara', 'Kiah', 'Amna'].includes(updatedMember.name) ? 'Women' : 'Men';
-          }
-          return updatedMember;
-        });
-        const names = migrated.map(m => m.name.toLowerCase());
-        let updated = [...migrated];
-        if (!names.includes('choice')) {
-          updated.splice(1, 0, { id: 'tm-choice', name: 'Choice', category: 'Men', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' });
-        }
-        if (!names.includes('aju')) {
-          updated.splice(2, 0, { id: 'tm-aju', name: 'Aju', category: 'Men', role: 'Till, Pouring & Vibe', shirtSize: 'Pending', shirtStatus: 'Pending', phone: '', notes: 'All-rounder crew' });
-        }
-        return updated;
-      }
+      const saved = localStorage.getItem('tlb_team_v3');
+      if (saved) return JSON.parse(saved);
       return INITIAL_TEAM;
     } catch {
       return INITIAL_TEAM;
@@ -323,37 +303,97 @@ export default function App() {
   // Expenses Sheet State
   const [expenses, setExpenses] = useState(() => {
     try {
-      const saved = localStorage.getItem('tlb_expenses_v2');
+      const saved = localStorage.getItem('tlb_expenses_v3');
       return saved ? JSON.parse(saved) : INITIAL_EXPENSES;
     } catch {
       return INITIAL_EXPENSES;
     }
   });
 
-  // Sync to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem('tlb_sales_v2', JSON.stringify(sales));
-    } catch (e) {
-      console.error(e);
-    }
-  }, [sales]);
+  // ==========================================================================
+  // MULTI-DEVICE CLOUD SYNC (Fixes data resetting or not showing across links)
+  // ==========================================================================
+  const pushToCloud = async (nextSales, nextTeam, nextExpenses) => {
+    const now = Date.now();
+    lastUpdatedRef.current = now;
+    isDirtyRef.current = false;
 
-  useEffect(() => {
-    try {
-      localStorage.setItem('tlb_team_v2', JSON.stringify(team));
-    } catch (e) {
-      console.error(e);
-    }
-  }, [team]);
+    const payload = {
+      updatedAt: now,
+      sales: nextSales,
+      team: nextTeam,
+      expenses: nextExpenses
+    };
 
-  useEffect(() => {
+    // Save locally immediately so refresh is instant
     try {
-      localStorage.setItem('tlb_expenses_v2', JSON.stringify(expenses));
+      localStorage.setItem('tlb_sales_v3', JSON.stringify(nextSales));
+      localStorage.setItem('tlb_team_v3', JSON.stringify(nextTeam));
+      localStorage.setItem('tlb_expenses_v3', JSON.stringify(nextExpenses));
+      localStorage.setItem('tlb_updated_at_v3', String(now));
     } catch (e) {
       console.error(e);
     }
-  }, [expenses]);
+
+    // Push to shared Cloud Store so all devices & Vercel URLs see it live
+    setSyncStatus('syncing');
+    try {
+      const res = await fetch(CLOUD_SYNC_ENDPOINT, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        setSyncStatus('synced');
+      } else {
+        setSyncStatus('offline');
+      }
+    } catch {
+      setSyncStatus('offline');
+    }
+  };
+
+  const pullFromCloud = async (showNotification = false) => {
+    // Don't overwrite if user is actively typing unsaved changes in backend
+    if (isDirtyRef.current) return;
+    try {
+      const res = await fetch(CLOUD_SYNC_ENDPOINT, { method: 'GET', cache: 'no-store' });
+      if (!res.ok) return;
+      const cloudData = await res.json();
+      if (cloudData && cloudData.updatedAt) {
+        const localUpdated = Number(localStorage.getItem('tlb_updated_at_v3') || 0);
+        if (cloudData.updatedAt > localUpdated) {
+          lastUpdatedRef.current = cloudData.updatedAt;
+          if (Array.isArray(cloudData.sales)) {
+            setSales(cloudData.sales);
+            localStorage.setItem('tlb_sales_v3', JSON.stringify(cloudData.sales));
+          }
+          if (Array.isArray(cloudData.team)) {
+            setTeam(cloudData.team);
+            localStorage.setItem('tlb_team_v3', JSON.stringify(cloudData.team));
+          }
+          if (Array.isArray(cloudData.expenses)) {
+            setExpenses(cloudData.expenses);
+            localStorage.setItem('tlb_expenses_v3', JSON.stringify(cloudData.expenses));
+          }
+          localStorage.setItem('tlb_updated_at_v3', String(cloudData.updatedAt));
+        }
+        setSyncStatus('synced');
+        if (showNotification) notify("Synced latest data from cloud!");
+      }
+    } catch {
+      // If cloud hasn't been initialized yet, initialize it with local state
+    }
+  };
+
+  // Initial pull + 5-second live polling across devices
+  useEffect(() => {
+    pullFromCloud(false);
+    const interval = setInterval(() => {
+      pullFromCloud(false);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Audio Click Feedback
   const playSound = (freq = 600, duration = 0.05) => {
@@ -370,14 +410,14 @@ export default function App() {
       gain.connect(audioCtx.destination);
       osc.start();
       osc.stop(audioCtx.currentTime + duration);
-    } catch (e) {
-      // AudioContext fallback
+    } catch {
+      // Ignore audio errors
     }
   };
 
   const notify = (msg) => {
     setToastMessage(String(msg));
-    setTimeout(() => setToastMessage(null), 2500);
+    setTimeout(() => setToastMessage(null), 2400);
   };
 
   // Cart Quantities & Totals Calculation
@@ -469,10 +509,10 @@ export default function App() {
     playSound(350, 0.08);
   };
 
-  // Complete Order
+  // Complete Order & Sync to Cloud immediately
   const handleCheckout = (paymentMethod) => {
     if (cartSummary.totalCups === 0) {
-      notify("Please tap at least 1 cup first!");
+      notify("Tap + on a drink first!");
       return;
     }
 
@@ -489,10 +529,12 @@ export default function App() {
       items: cartSummary.items
     };
 
-    setSales([newSale, ...sales]);
+    const nextSales = [newSale, ...sales];
+    setSales(nextSales);
     clearCart();
     playSound(880, 0.12);
-    notify(`Order #${newSale.orderNumber} Logged! (${paymentMethod})`);
+    notify(`Order #${newSale.orderNumber} • MVR ${newSale.grossTotal} (${paymentMethod})`);
+    pushToCloud(nextSales, team, expenses);
   };
 
   // Open confirmation modal for Undoing Last Sale
@@ -514,14 +556,16 @@ export default function App() {
     });
   };
 
-  // Execute confirmed order deletion
+  // Execute confirmed order deletion & sync to cloud
   const executeDeleteOrder = () => {
     if (!deleteConfirmation.order) return;
     const targetOrder = deleteConfirmation.order;
-    setSales(sales.filter(s => s.id !== targetOrder.id));
-    notify(`Deleted Order #${targetOrder.orderNumber} (MVR ${targetOrder.grossTotal})`);
+    const nextSales = sales.filter(s => s.id !== targetOrder.id);
+    setSales(nextSales);
+    notify(`Voided Order #${targetOrder.orderNumber}`);
     playSound(320, 0.1);
     setDeleteConfirmation({ isOpen: false, order: null, isUndoLast: false });
+    pushToCloud(nextSales, team, expenses);
   };
 
   // Auto-Unlock on 4-digit PIN Entry
@@ -595,71 +639,74 @@ export default function App() {
   const kidsTally = Object.entries(shirtSummary.byCategory.Kids || {});
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-yellow-400 selection:text-slate-950">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-yellow-400 selection:text-slate-950 pb-28 md:pb-6">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-yellow-400 text-slate-950 px-4 py-2 rounded-2xl font-black text-sm shadow-2xl flex items-center gap-2 animate-bounce">
-          <Sparkles className="w-4 h-4" />
+        <div className="fixed top-3 left-1/2 -translate-x-1/2 z-50 bg-yellow-400 text-slate-950 px-3.5 py-2 rounded-2xl font-black text-xs sm:text-sm shadow-2xl flex items-center gap-2 whitespace-nowrap">
+          <Sparkles className="w-4 h-4 shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}
 
-      {/* Top Universal Navbar */}
-      <header className="border-b border-slate-800 bg-slate-900/90 backdrop-blur-md sticky top-0 z-40 px-3 sm:px-6 py-2.5">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
-          {/* Brand Info */}
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-yellow-400 to-amber-500 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-yellow-400/20 shrink-0">
+      {/* ======================================================================
+          MOBILE-OPTIMIZED HEADER (Fits 100% on iPhone without cutoff)
+         ====================================================================== */}
+      <header className="border-b border-slate-800/90 bg-slate-900/95 backdrop-blur-md sticky top-0 z-40 px-2.5 sm:px-5 py-2">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-1.5">
+          {/* Brand Logo & Title */}
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-yellow-400 to-amber-500 flex items-center justify-center text-slate-950 font-black text-base sm:text-xl shadow-md shrink-0">
               🍋
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="font-black text-base sm:text-lg tracking-tight text-white leading-tight">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <h1 className="font-black text-sm sm:text-lg tracking-tight text-white truncate">
                   The Lemonade Bros
                 </h1>
-                <span className="hidden sm:inline px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-yellow-400/10 text-yellow-300 border border-yellow-400/30">
-                  Ulduz Pvt Ltd
-                </span>
+                {/* Live Cloud Status Pill */}
+                <button
+                  onClick={() => pullFromCloud(true)}
+                  className={`px-1.5 py-0.5 rounded-full text-[9px] font-bold flex items-center gap-1 border shrink-0 ${
+                    syncStatus === 'synced'
+                      ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                      : syncStatus === 'syncing'
+                      ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
+                      : 'bg-slate-800 text-slate-400 border-slate-700'
+                  }`}
+                  title="Tap to force sync across devices"
+                >
+                  <Cloud className="w-2.5 h-2.5" />
+                  <span className="hidden xs:inline">{syncStatus === 'syncing' ? 'Syncing' : 'Live'}</span>
+                </button>
               </div>
-              <p className="text-[11px] text-slate-400 font-medium truncate max-w-[200px] sm:max-w-none">
-                Dhiraagu Road Race 2026 • Hulhumalé Central Park
+              <p className="text-[10px] sm:text-[11px] text-slate-400 font-medium truncate">
+                Dhiraagu Road Race 2026 • Hulhumalé
               </p>
             </div>
           </div>
 
-          {/* Action Bar & Mode Switcher */}
-          <div className="flex items-center gap-2">
-            {/* Deploy / Open Anywhere Button */}
-            <button
-              onClick={() => setShowDeployModal(true)}
-              className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-bold flex items-center gap-1.5 transition-colors touch-manipulation"
-              title="How to open this on any phone or iPad"
-            >
-              <Globe className="w-3.5 h-3.5 text-yellow-400" />
-              <span className="hidden sm:inline">Open on Phone/iPad</span>
-              <span className="sm:hidden">Share</span>
-            </button>
-
+          {/* Right Controls: Compact on Mobile so nothing clips off-screen */}
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             {/* Sound Toggle */}
             <button
               onClick={() => setSoundEnabled(!soundEnabled)}
-              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
-              title={soundEnabled ? "Mute audio" : "Enable clicks"}
+              className="p-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
+              title="Toggle Sound"
             >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-yellow-400" /> : <VolumeX className="w-4 h-4" />}
+              {soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-yellow-400" /> : <VolumeX className="w-3.5 h-3.5" />}
             </button>
 
             {/* Till Mode Switch */}
             <button
               onClick={() => setActiveMode('till')}
-              className={`px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold flex items-center gap-1.5 transition-all touch-manipulation ${
+              className={`px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-extrabold flex items-center gap-1 transition-all touch-manipulation ${
                 activeMode === 'till'
-                  ? 'bg-yellow-400 text-slate-950 shadow-lg shadow-yellow-400/25'
-                  : 'bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800'
+                  ? 'bg-yellow-400 text-slate-950 shadow-md shadow-yellow-400/20'
+                  : 'bg-slate-800/80 text-slate-300 hover:bg-slate-800 border border-slate-700/80'
               }`}
             >
-              <ShoppingBag className="w-4 h-4" />
-              <span>Sales Till</span>
+              <ShoppingBag className="w-3.5 h-3.5 shrink-0" />
+              <span>Till</span>
             </button>
 
             {/* Backend Mode Switch */}
@@ -671,30 +718,31 @@ export default function App() {
                   setShowPinModal(true);
                 }
               }}
-              className={`px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold flex items-center gap-1.5 transition-all touch-manipulation ${
+              className={`px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-extrabold flex items-center gap-1 transition-all touch-manipulation ${
                 activeMode === 'admin'
-                  ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/25'
-                  : 'bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800'
+                  ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
+                  : 'bg-slate-800/80 text-slate-300 hover:bg-slate-800 border border-slate-700/80'
               }`}
             >
-              {isAdminUnlocked ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4 text-amber-400" />}
-              <span className="hidden sm:inline">Backend</span>
+              {isAdminUnlocked ? <Unlock className="w-3.5 h-3.5 shrink-0" /> : <Lock className="w-3.5 h-3.5 text-amber-400 shrink-0" />}
+              <span>Admin</span>
             </button>
           </div>
         </div>
       </header>
 
       {/* ========================================================================
-          MODE 1: SALES TILL (PHONE & IPAD ADAPTED, ZERO FINANCIAL PROFIT DISPLAY)
+          MODE 1: SALES TILL (SLEEK MOBILE & IPAD ADAPTIVE VIEW)
          ======================================================================== */}
       {activeMode === 'till' ? (
-        <main className="flex-1 max-w-7xl w-full mx-auto p-2.5 sm:p-4 md:p-6 flex flex-col gap-3.5 sm:gap-4">
-          {/* Top Crew Bar: Dropdown for Till Member & Live Sales Counter */}
-          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-2.5 sm:p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 shrink-0 flex items-center gap-1">
-                <UserCheck className="w-3.5 h-3.5 text-yellow-400" />
-                On Till:
+        <main className="flex-1 max-w-7xl w-full mx-auto px-2.5 sm:px-4 md:px-6 pt-2.5 sm:pt-4 flex flex-col gap-2.5 sm:gap-4">
+          {/* Single-Row Top Status Bar on Mobile: On Till Dropdown + Total Sales Counter */}
+          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-2 sm:p-3 flex items-center justify-between gap-2">
+            {/* Cashier Dropdown */}
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400 shrink-0 flex items-center gap-1">
+                <UserCheck className="w-3.5 h-3.5 text-yellow-400 hidden xs:inline" />
+                Till:
               </span>
               <div className="relative">
                 <select
@@ -703,7 +751,7 @@ export default function App() {
                     setActiveCashier(e.target.value);
                     playSound(520, 0.04);
                   }}
-                  className="bg-slate-950 text-yellow-300 font-extrabold text-xs sm:text-sm border border-slate-700/80 rounded-xl px-3 py-1.5 focus:outline-none focus:border-yellow-400 cursor-pointer appearance-none pr-8 shadow-inner"
+                  className="bg-slate-950 text-yellow-300 font-extrabold text-xs sm:text-sm border border-slate-700 rounded-xl pl-2.5 pr-6 py-1 sm:py-1.5 focus:outline-none focus:border-yellow-400 cursor-pointer appearance-none"
                 >
                   {team.map((member) => (
                     <option key={member.id} value={member.name} className="bg-slate-900 text-white">
@@ -711,58 +759,57 @@ export default function App() {
                     </option>
                   ))}
                 </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-yellow-400">
-                  <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1.5 text-yellow-400">
+                  <svg className="fill-current h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                     <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
                   </svg>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center justify-between sm:justify-end gap-2.5 border-t sm:border-t-0 border-slate-800 pt-2 sm:pt-0 shrink-0">
-              {/* Total Amount of Sales Live Counter */}
-              <div className="flex items-center gap-2 bg-gradient-to-r from-amber-500/15 to-yellow-500/10 px-3 py-1.5 rounded-xl border border-yellow-400/30 shadow-sm">
-                <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-300">
+            {/* Live Total Sales Counter + Undo */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              <div className="flex items-center gap-1.5 bg-gradient-to-r from-amber-500/15 to-yellow-500/10 px-2.5 py-1 sm:py-1.5 rounded-xl border border-yellow-400/30">
+                <span className="text-[10px] font-bold uppercase text-slate-300 hidden sm:inline">
                   Total Sales:
                 </span>
-                <span className="text-xs sm:text-sm font-black text-yellow-400 font-mono tracking-tight">
+                <span className="text-xs sm:text-sm font-black text-yellow-400 font-mono">
                   MVR {metrics.grossRevenue.toLocaleString()}
                 </span>
                 <span className="text-[10px] font-mono text-slate-400">
-                  ({metrics.totalCupsSold} cups)
+                  ({metrics.totalCupsSold}c)
                 </span>
               </div>
 
               {sales.length > 0 && (
                 <button
                   onClick={handlePromptUndoLast}
-                  className="px-2.5 py-1 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs font-bold flex items-center gap-1 transition-colors touch-manipulation"
-                  title="Undo the most recent transaction"
+                  className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs font-bold flex items-center gap-1 touch-manipulation"
+                  title="Undo Last Order"
                 >
                   <Undo2 className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Undo Last</span>
-                  <span className="sm:hidden">Undo</span>
+                  <span className="hidden sm:inline">Undo</span>
                 </button>
               )}
             </div>
           </div>
 
-          {/* Main Till Grid: Mobile stacked, Tablet/iPad 2-column layout */}
-          <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-3.5 sm:gap-4 md:gap-5">
-            {/* Left Column: Drinks & Tap Cards */}
-            <div className="md:col-span-7 lg:col-span-8 flex flex-col gap-3.5">
-              {/* Discount Banner Toggle */}
-              <div className={`p-3 sm:p-3.5 rounded-2xl border flex items-center justify-between gap-2 transition-all ${
+          {/* Main Till Grid */}
+          <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2.5 sm:gap-4">
+            {/* Left Column: Discount Bar + 3 Drink Cards */}
+            <div className="md:col-span-7 lg:col-span-8 flex flex-col gap-2.5 sm:gap-3.5">
+              {/* Compact Discount Bar */}
+              <div className={`px-3 py-2 sm:p-3 rounded-2xl border flex items-center justify-between gap-2 transition-all ${
                 discountApplied
                   ? 'bg-rose-500/15 border-rose-500/50 text-rose-200'
-                  : 'bg-slate-900/60 border-slate-800 text-slate-300'
+                  : 'bg-slate-900/70 border-slate-800 text-slate-300'
               }`}>
-                <div className="flex items-center gap-2">
-                  <Tag className={`w-4 h-4 shrink-0 ${discountApplied ? 'text-rose-400' : 'text-yellow-400'}`} />
-                  <span className="text-xs sm:text-sm font-bold leading-tight">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Tag className={`w-3.5 h-3.5 shrink-0 ${discountApplied ? 'text-rose-400' : 'text-yellow-400'}`} />
+                  <span className="text-[11px] sm:text-sm font-bold truncate">
                     {discountApplied
-                      ? 'DISCOUNT ON: Drinks are MVR 50 & MVR 60 (-10/cup)'
-                      : 'Standard: Classic MVR 60 • Strawberry MVR 70'}
+                      ? 'DISCOUNT ON: MVR 50 & MVR 60 (-10/cup)'
+                      : 'Standard: Classic 60 • Strawberry 70'}
                   </span>
                 </div>
                 <button
@@ -770,18 +817,18 @@ export default function App() {
                     setDiscountApplied(!discountApplied);
                     playSound(480, 0.06);
                   }}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-black shrink-0 touch-manipulation transition-all ${
+                  className={`px-2.5 py-1 rounded-xl text-[11px] sm:text-xs font-black shrink-0 touch-manipulation transition-all ${
                     discountApplied
                       ? 'bg-rose-500 text-white shadow-md'
-                      : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700'
+                      : 'bg-slate-800 text-slate-200 hover:bg-slate-700 border border-slate-700'
                   }`}
                 >
-                  {discountApplied ? 'Discount Active (-10)' : 'Apply -10'}
+                  {discountApplied ? '-10 ON' : 'Apply -10'}
                 </button>
               </div>
 
-              {/* 3 Drink Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-3.5 flex-1">
+              {/* 3 Drink Cards: Ergonomic Horizontal Layout on Mobile, 3-Column Cards on iPad/Desktop */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3.5">
                 {PRODUCTS.map((prod) => {
                   const qty = cart[prod.id] || 0;
                   const activeUnitPrice = discountApplied ? prod.discountedPrice : prod.basePrice;
@@ -789,75 +836,79 @@ export default function App() {
                   return (
                     <div
                       key={prod.id}
-                      className={`relative flex flex-col justify-between rounded-3xl p-3.5 sm:p-4 md:p-5 border transition-all shadow-xl ${
+                      className={`relative rounded-2xl sm:rounded-3xl p-3 sm:p-4 border transition-all shadow-lg flex flex-col justify-between ${
                         qty > 0
                           ? `${prod.border} bg-slate-900 ring-2 ring-yellow-400/30`
-                          : 'border-slate-800 bg-slate-900/60 hover:border-slate-700'
+                          : 'border-slate-800 bg-slate-900/60'
                       }`}
                     >
-                      <div>
-                        <div className="flex items-start justify-between gap-2">
-                          <span className="text-3xl sm:text-4xl p-2 sm:p-2.5 rounded-2xl bg-slate-950 border border-slate-800 shadow-inner">
+                      {/* Top Info Row */}
+                      <div className="flex items-center sm:items-start justify-between gap-2.5">
+                        <div className="flex items-center sm:block gap-2.5 min-w-0">
+                          <span className="text-2xl sm:text-4xl p-2 sm:p-2.5 rounded-xl sm:rounded-2xl bg-slate-950 border border-slate-800 shadow-inner shrink-0 inline-block">
                             {prod.emoji}
                           </span>
-                          <div className="text-right">
-                            {discountApplied && (
-                              <span className="block text-[10px] sm:text-[11px] text-rose-400 line-through font-mono">
-                                MVR {prod.basePrice}
-                              </span>
-                            )}
-                            <span className={`inline-block px-2.5 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-black font-mono border ${
-                              discountApplied
-                                ? 'bg-rose-500 text-white border-rose-400'
-                                : 'bg-slate-950 text-yellow-300 border-slate-800'
-                            }`}>
-                              MVR {activeUnitPrice}
-                            </span>
+                          <div className="min-w-0 sm:mt-2.5">
+                            <h3 className="text-sm sm:text-lg font-black text-white leading-tight truncate">
+                              {prod.name}
+                            </h3>
+                            <p className="text-[11px] text-slate-400 line-clamp-1 sm:line-clamp-2 mt-0.5">
+                              {prod.desc}
+                            </p>
                           </div>
                         </div>
 
-                        <h3 className="mt-2.5 sm:mt-3 text-base sm:text-lg md:text-xl font-black text-white leading-snug">
-                          {prod.name}
-                        </h3>
-                        <p className="mt-0.5 sm:mt-1 text-[11px] sm:text-xs text-slate-400">
-                          {prod.desc}
-                        </p>
+                        {/* Price Badge */}
+                        <div className="text-right shrink-0">
+                          {discountApplied && (
+                            <span className="block text-[10px] text-rose-400 line-through font-mono">
+                              MVR {prod.basePrice}
+                            </span>
+                          )}
+                          <span className={`inline-block px-2.5 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-black font-mono border ${
+                            discountApplied
+                              ? 'bg-rose-500 text-white border-rose-400'
+                              : 'bg-slate-950 text-yellow-300 border-slate-800'
+                          }`}>
+                            MVR {activeUnitPrice}
+                          </span>
+                        </div>
                       </div>
 
-                      {/* Clean Giant '+' Button & Controls */}
-                      <div className="mt-4 sm:mt-5 space-y-2">
+                      {/* Controls Row: Compact & Fast on Phone, Tall on Tablet */}
+                      <div className="mt-2.5 sm:mt-4 flex sm:flex-col items-center gap-2">
+                        {/* Giant '+' Tap Button */}
                         <button
                           onClick={() => updateCartCup(prod.id, 1)}
-                          className={`w-full py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r ${prod.accent} text-slate-950 font-black text-3xl sm:text-4xl shadow-lg active:scale-95 touch-manipulation transition-transform flex items-center justify-center`}
+                          className={`flex-1 sm:w-full py-2.5 sm:py-4 rounded-xl sm:rounded-2xl bg-gradient-to-r ${prod.accent} text-slate-950 font-black text-2xl sm:text-3xl shadow-md active:scale-95 touch-manipulation transition-transform flex items-center justify-center`}
                           aria-label={`Add 1 ${prod.name}`}
                         >
-                          <Plus className="w-8 h-8" />
+                          <Plus className="w-6 h-6 sm:w-8 sm:h-8" />
                         </button>
 
-                        {/* Quick Controls */}
-                        <div className="flex items-center justify-between pt-1">
-                          <div className="flex items-center gap-1.5">
-                            <button
-                              onClick={() => updateCartCup(prod.id, 2)}
-                              className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold active:scale-95 touch-manipulation"
-                            >
-                              +2
-                            </button>
-                            {qty > 0 && (
-                              <button
-                                onClick={() => updateCartCup(prod.id, -1)}
-                                className="p-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 active:scale-95 touch-manipulation"
-                                title="Remove 1 cup"
-                              >
-                                <Minus className="w-4 h-4" />
-                              </button>
-                            )}
-                          </div>
+                        {/* Secondary Controls (+2, -, Qty badge) */}
+                        <div className="flex items-center justify-between sm:w-full gap-1.5 shrink-0">
+                          <button
+                            onClick={() => updateCartCup(prod.id, 2)}
+                            className="px-2.5 py-2 sm:py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-extrabold active:scale-95 touch-manipulation"
+                          >
+                            +2
+                          </button>
 
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-[11px] text-slate-400 font-semibold">Qty:</span>
-                            <span className={`min-w-[32px] text-center px-2 py-0.5 rounded-lg font-black text-base font-mono ${
-                              qty > 0 ? 'bg-yellow-400 text-slate-950' : 'bg-slate-950 text-slate-500'
+                          {qty > 0 && (
+                            <button
+                              onClick={() => updateCartCup(prod.id, -1)}
+                              className="p-2 sm:p-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 active:scale-95 touch-manipulation"
+                              title="Remove 1 cup"
+                            >
+                              <Minus className="w-4 h-4" />
+                            </button>
+                          )}
+
+                          <div className="flex items-center gap-1 pl-1">
+                            <span className="text-[10px] text-slate-400 font-semibold hidden sm:inline">Qty:</span>
+                            <span className={`min-w-[30px] text-center px-2 py-1 sm:py-0.5 rounded-lg font-black text-sm font-mono ${
+                              qty > 0 ? 'bg-yellow-400 text-slate-950' : 'bg-slate-950 text-slate-500 border border-slate-800'
                             }`}>
                               {qty}
                             </span>
@@ -870,31 +921,31 @@ export default function App() {
               </div>
 
               {/* Recent Orders Feed */}
-              <div className="bg-slate-900/50 rounded-2xl p-3 border border-slate-800/80">
+              <div className="bg-slate-900/50 rounded-2xl p-2.5 sm:p-3 border border-slate-800/80">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                  <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                     <Receipt className="w-3.5 h-3.5 text-yellow-400" />
-                    Last Orders at Stall
+                    Recent Stall Orders
                   </span>
-                  <span className="text-[10px] text-slate-500">Ulduz Payment Collection</span>
+                  <span className="text-[10px] text-slate-500">Live Sync Active</span>
                 </div>
                 {sales.length === 0 ? (
-                  <p className="text-xs text-slate-500 italic py-1">No sales logged yet. Ready for runners!</p>
+                  <p className="text-xs text-slate-500 italic py-1">No sales logged yet. Ready for race day!</p>
                 ) : (
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {sales.slice(0, 4).map((s) => (
-                      <div key={s.id} className="bg-slate-950 border border-slate-800 p-2.5 rounded-xl flex flex-col justify-between">
+                      <div key={s.id} className="bg-slate-950 border border-slate-800 p-2 rounded-xl flex flex-col justify-between">
                         <div className="flex items-center justify-between text-[10px]">
-                          <span className="font-mono font-bold text-slate-400">#{s.orderNumber} • {s.cashier}</span>
-                          <span className="px-1.5 py-0.5 rounded bg-slate-900 text-slate-300 font-semibold">
-                            {s.paymentMethod === 'Cash' ? '💵 Cash' : '🏦 Transfer'}
+                          <span className="font-mono font-bold text-slate-400 truncate">#{s.orderNumber} • {s.cashier}</span>
+                          <span className="px-1 py-0.5 rounded bg-slate-900 text-slate-300 font-semibold shrink-0">
+                            {s.paymentMethod === 'Cash' ? '💵' : '🏦'}
                           </span>
                         </div>
-                        <div className="mt-1.5 flex items-baseline justify-between">
-                          <span className="text-xs font-semibold text-slate-300">
+                        <div className="mt-1 flex items-baseline justify-between">
+                          <span className="text-[11px] font-semibold text-slate-300">
                             {s.cupsTotal} cup{s.cupsTotal > 1 ? 's' : ''}
                           </span>
-                          <span className="text-sm font-black text-yellow-400 font-mono">MVR {s.grossTotal}</span>
+                          <span className="text-xs sm:text-sm font-black text-yellow-400 font-mono">MVR {s.grossTotal}</span>
                         </div>
                       </div>
                     ))}
@@ -903,9 +954,9 @@ export default function App() {
               </div>
             </div>
 
-            {/* Right Column: Checkout & Tender Drawer */}
-            <div className="md:col-span-5 lg:col-span-4 flex flex-col">
-              <div className="bg-slate-900 rounded-3xl p-4 sm:p-5 border border-slate-800 shadow-2xl flex flex-col justify-between flex-1">
+            {/* Right Column (iPad / Desktop): Full Order & Tender Drawer */}
+            <div className="hidden md:flex md:col-span-5 lg:col-span-4 flex-col">
+              <div className="bg-slate-900 rounded-3xl p-5 border border-slate-800 shadow-2xl flex flex-col justify-between flex-1">
                 <div>
                   <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                     <div className="flex items-center gap-2">
@@ -915,20 +966,19 @@ export default function App() {
                     {cartSummary.totalCups > 0 && (
                       <button
                         onClick={clearCart}
-                        className="text-xs font-bold text-rose-400 hover:text-rose-300 px-2 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 transition-colors"
+                        className="text-xs font-bold text-rose-400 hover:text-rose-300 px-2 py-1 rounded-lg bg-rose-500/10"
                       >
                         Clear
                       </button>
                     )}
                   </div>
 
-                  {/* Cart Items List */}
                   <div className="mt-3.5 space-y-2.5 max-h-56 overflow-y-auto pr-1">
                     {cartSummary.totalCups === 0 ? (
                       <div className="text-center py-8 text-slate-500">
                         <div className="text-3xl mb-1">🥤</div>
                         <p className="text-sm font-semibold">No cups selected yet</p>
-                        <p className="text-xs text-slate-600">Tap any drink card to count cups</p>
+                        <p className="text-xs text-slate-600">Tap + on any drink card</p>
                       </div>
                     ) : (
                       cartSummary.items.map((item) => (
@@ -942,32 +992,15 @@ export default function App() {
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-3">
-                            <span className="font-mono font-black text-sm text-yellow-400">
-                              MVR {item.lineTotal}
-                            </span>
-                            <div className="flex items-center gap-1">
-                              <button
-                                onClick={() => updateCartCup(item.id, -1)}
-                                className="w-6 h-6 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center text-xs font-bold"
-                              >
-                                -
-                              </button>
-                              <button
-                                onClick={() => updateCartCup(item.id, 1)}
-                                className="w-6 h-6 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center text-xs font-bold"
-                              >
-                                +
-                              </button>
-                            </div>
-                          </div>
+                          <span className="font-mono font-black text-sm text-yellow-400">
+                            MVR {item.lineTotal}
+                          </span>
                         </div>
                       ))
                     )}
                   </div>
                 </div>
 
-                {/* Bottom Total & Tender Action Buttons */}
                 <div className="mt-4 pt-4 border-t border-slate-800 space-y-3">
                   <div className="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 flex items-baseline justify-between">
                     <div>
@@ -976,19 +1009,16 @@ export default function App() {
                         {cartSummary.totalCups} Cup{cartSummary.totalCups !== 1 ? 's' : ''}
                       </span>
                     </div>
-                    <div className="text-right">
-                      <span className="text-2xl sm:text-3xl font-black font-mono text-yellow-400">
-                        MVR {cartSummary.totalAmount}
-                      </span>
-                    </div>
+                    <span className="text-3xl font-black font-mono text-yellow-400">
+                      MVR {cartSummary.totalAmount}
+                    </span>
                   </div>
 
-                  {/* 1-Tap Tender Buttons */}
                   <div className="grid grid-cols-2 gap-2.5">
                     <button
                       onClick={() => handleCheckout('Cash')}
                       disabled={cartSummary.totalCups === 0}
-                      className="py-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-30 disabled:hover:bg-emerald-500 text-slate-950 font-black text-sm sm:text-base shadow-lg shadow-emerald-500/20 active:scale-95 touch-manipulation transition-all flex flex-col items-center justify-center"
+                      className="py-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-30 text-slate-950 font-black text-base shadow-lg active:scale-95 transition-all flex flex-col items-center justify-center"
                     >
                       <span className="text-lg">💵</span>
                       <span>COLLECT CASH</span>
@@ -997,47 +1027,92 @@ export default function App() {
                     <button
                       onClick={() => handleCheckout('Transfer')}
                       disabled={cartSummary.totalCups === 0}
-                      className="py-4 rounded-2xl bg-blue-500 hover:bg-blue-400 disabled:opacity-30 disabled:hover:bg-blue-500 text-white font-black text-sm sm:text-base shadow-lg shadow-blue-500/20 active:scale-95 touch-manipulation transition-all flex flex-col items-center justify-center"
+                      className="py-4 rounded-2xl bg-blue-500 hover:bg-blue-400 disabled:opacity-30 text-white font-black text-base shadow-lg active:scale-95 transition-all flex flex-col items-center justify-center"
                     >
                       <span className="text-lg">🏦</span>
                       <span>BANK TRANSFER</span>
                     </button>
                   </div>
-                  <p className="text-[10px] text-center text-slate-500">
-                    Collected on behalf of Ulduz Private Limited
-                  </p>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ====================================================================
+              STICKY MOBILE BOTTOM CHECKOUT BAR (Always reachable with thumb!)
+             ==================================================================== */}
+          <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-lg border-t border-slate-800 px-3 py-2.5 shadow-2xl">
+            <div className="flex items-center justify-between gap-2 max-w-lg mx-auto">
+              {/* Order Summary & Clear */}
+              <div className="min-w-[95px]">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-bold uppercase text-slate-400">
+                    {cartSummary.totalCups} Cup{cartSummary.totalCups !== 1 ? 's' : ''}
+                  </span>
+                  {cartSummary.totalCups > 0 && (
+                    <button
+                      onClick={clearCart}
+                      className="text-[10px] font-bold text-rose-400 underline"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+                <div className="text-lg font-black font-mono text-yellow-400 leading-tight">
+                  MVR {cartSummary.totalAmount}
+                </div>
+              </div>
+
+              {/* 1-Tap Cash & Transfer Buttons */}
+              <div className="flex-1 grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => handleCheckout('Cash')}
+                  disabled={cartSummary.totalCups === 0}
+                  className="py-3 rounded-xl bg-emerald-500 active:bg-emerald-400 disabled:opacity-30 text-slate-950 font-black text-xs shadow-md active:scale-95 touch-manipulation flex items-center justify-center gap-1.5"
+                >
+                  <span>💵</span>
+                  <span>CASH</span>
+                </button>
+
+                <button
+                  onClick={() => handleCheckout('Transfer')}
+                  disabled={cartSummary.totalCups === 0}
+                  className="py-3 rounded-xl bg-blue-500 active:bg-blue-400 disabled:opacity-30 text-white font-black text-xs shadow-md active:scale-95 touch-manipulation flex items-center justify-center gap-1.5"
+                >
+                  <span>🏦</span>
+                  <span>TRANSFER</span>
+                </button>
               </div>
             </div>
           </div>
         </main>
       ) : (
         /* ========================================================================
-            MODE 2: ADMIN BACKEND (PASSWORD 1234, PROFIT, ROSTER & EXPENSES)
+            MODE 2: ADMIN BACKEND (PASSWORD 1234, CLOUD SYNCED)
            ======================================================================== */
-        <main className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-5 md:p-6 flex flex-col gap-5">
+        <main className="flex-1 max-w-7xl w-full mx-auto p-2.5 sm:p-5 md:p-6 flex flex-col gap-4 sm:gap-5">
           {/* Sub Navigation Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-900 p-2 rounded-2xl border border-slate-800">
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+          <div className="flex flex-wrap items-center justify-between gap-2 bg-slate-900 p-2 rounded-2xl border border-slate-800">
+            <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
               <button
                 onClick={() => setAdminSubTab('overview')}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-colors ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-colors ${
                   adminSubTab === 'overview' ? 'bg-yellow-400 text-slate-950' : 'text-slate-300 hover:bg-slate-800'
                 }`}
               >
-                Financial Overview
+                Overview
               </button>
               <button
                 onClick={() => setAdminSubTab('expenses')}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-colors ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-colors ${
                   adminSubTab === 'expenses' ? 'bg-yellow-400 text-slate-950' : 'text-slate-300 hover:bg-slate-800'
                 }`}
               >
-                Expenses Sheet (Max 5K)
+                Expenses (Max 5K)
               </button>
               <button
                 onClick={() => setAdminSubTab('team')}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-colors ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-colors ${
                   adminSubTab === 'team' ? 'bg-yellow-400 text-slate-950' : 'text-slate-300 hover:bg-slate-800'
                 }`}
               >
@@ -1045,73 +1120,80 @@ export default function App() {
               </button>
               <button
                 onClick={() => setAdminSubTab('sales')}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-colors ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-colors ${
                   adminSubTab === 'sales' ? 'bg-yellow-400 text-slate-950' : 'text-slate-300 hover:bg-slate-800'
                 }`}
               >
-                Transactions Log
+                Sales Log
               </button>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => pullFromCloud(true)}
+                className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center gap-1 border border-slate-700"
+                title="Refresh from Cloud"
+              >
+                <RefreshCw className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="hidden sm:inline">Sync</span>
+              </button>
               <button
                 onClick={exportSalesCSV}
-                className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center gap-1.5 border border-slate-700 transition-colors"
+                className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center gap-1 border border-slate-700"
               >
                 <Download className="w-3.5 h-3.5 text-yellow-400" />
-                <span>Export CSV</span>
+                <span className="hidden sm:inline">CSV</span>
               </button>
               <button
                 onClick={() => {
                   setIsAdminUnlocked(false);
                   setActiveMode('till');
                 }}
-                className="px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 text-xs font-bold border border-rose-500/30 transition-colors"
+                className="px-2.5 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 text-xs font-bold border border-rose-500/30"
               >
-                Lock Backend
+                Lock
               </button>
             </div>
           </div>
 
           {/* TAB 1: FINANCIAL OVERVIEW */}
           {adminSubTab === 'overview' && (
-            <div className="space-y-5">
-              {/* Top Key Metrics Cards */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                <div className="bg-slate-900 border border-slate-800 p-4 rounded-3xl">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Gross Revenue</span>
-                  <p className="mt-1 text-2xl sm:text-3xl font-black font-mono text-emerald-400">
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+                <div className="bg-slate-900 border border-slate-800 p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl">
+                  <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase block">Gross Revenue</span>
+                  <p className="mt-1 text-xl sm:text-3xl font-black font-mono text-emerald-400">
                     MVR {metrics.grossRevenue.toLocaleString()}
                   </p>
-                  <p className="mt-1 text-[11px] text-slate-500">
-                    Cash: MVR {metrics.cashRevenue} • Transfer: MVR {metrics.transferRevenue}
+                  <p className="mt-1 text-[10px] sm:text-[11px] text-slate-500">
+                    Cash: {metrics.cashRevenue} • Bank: {metrics.transferRevenue}
                   </p>
                 </div>
 
-                <div className="bg-slate-900 border border-slate-800 p-4 rounded-3xl">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Logged Expenses</span>
-                  <p className="mt-1 text-2xl sm:text-3xl font-black font-mono text-rose-400">
+                <div className="bg-slate-900 border border-slate-800 p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl">
+                  <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase block">Logged Expenses</span>
+                  <p className="mt-1 text-xl sm:text-3xl font-black font-mono text-rose-400">
                     MVR {metrics.totalExpenses.toLocaleString()}
                   </p>
-                  <p className="mt-1 text-[11px] text-slate-500">
-                    Budget Cap: MVR {EXPENSE_CAP.toLocaleString()}
+                  <p className="mt-1 text-[10px] sm:text-[11px] text-slate-500">
+                    Cap: MVR {EXPENSE_CAP.toLocaleString()}
                   </p>
                 </div>
 
-                <div className="bg-slate-900 border border-slate-800 p-4 rounded-3xl">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Net Profit</span>
-                  <p className={`mt-1 text-2xl sm:text-3xl font-black font-mono ${metrics.netProfit >= 0 ? 'text-yellow-400' : 'text-rose-400'}`}>
+                <div className="bg-slate-900 border border-slate-800 p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl">
+                  <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase block">Net Profit</span>
+                  <p className={`mt-1 text-xl sm:text-3xl font-black font-mono ${metrics.netProfit >= 0 ? 'text-yellow-400' : 'text-rose-400'}`}>
                     MVR {metrics.netProfit.toLocaleString()}
                   </p>
-                  <p className="mt-1 text-[11px] text-slate-500">
+                  <p className="mt-1 text-[10px] sm:text-[11px] text-slate-500">
                     Margin: {metrics.profitMargin}%
                   </p>
                 </div>
 
-                <div className="bg-slate-900 border border-slate-800 p-4 rounded-3xl">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">2,000 Cup Goal</span>
-                  <p className="mt-1 text-2xl sm:text-3xl font-black font-mono text-white">
-                    {metrics.totalCupsSold} <span className="text-sm font-normal text-slate-400">/ 2,000</span>
+                <div className="bg-slate-900 border border-slate-800 p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl">
+                  <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase block">2,000 Cup Goal</span>
+                  <p className="mt-1 text-xl sm:text-3xl font-black font-mono text-white">
+                    {metrics.totalCupsSold} <span className="text-xs font-normal text-slate-400">/ 2,000</span>
                   </p>
                   <div className="mt-2 w-full bg-slate-800 h-2 rounded-full overflow-hidden">
                     <div
@@ -1124,8 +1206,8 @@ export default function App() {
 
               {/* Flavor Breakdown & Cashier Tally */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-slate-900 border border-slate-800 p-4 sm:p-5 rounded-3xl">
-                  <h3 className="font-bold text-sm text-white mb-3">Cups Sold By Signature Flavor</h3>
+                <div className="bg-slate-900 border border-slate-800 p-4 rounded-3xl">
+                  <h3 className="font-bold text-sm text-white mb-3">Cups Sold By Flavor</h3>
                   <div className="space-y-3">
                     {PRODUCTS.map(p => {
                       const count = metrics.flavorCounts[p.id] || 0;
@@ -1145,7 +1227,7 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="bg-slate-900 border border-slate-800 p-4 sm:p-5 rounded-3xl">
+                <div className="bg-slate-900 border border-slate-800 p-4 rounded-3xl">
                   <h3 className="font-bold text-sm text-white mb-3">Cups Logged By Cashier</h3>
                   <div className="max-h-44 overflow-y-auto space-y-2 pr-1">
                     {Object.keys(metrics.cashierTally).length === 0 ? (
@@ -1171,14 +1253,14 @@ export default function App() {
                 <div>
                   <h3 className="font-bold text-base text-white">Event Budget & Cost Sheet</h3>
                   <p className="text-xs text-slate-400">
-                    Total expenses strictly capped under MVR 5,000 (Stall is free via Dhiraagu)
+                    Changes sync across all devices when you tap Save Changes
                   </p>
                 </div>
                 <div className="flex items-center gap-2 self-start sm:self-auto">
                   <button
                     onClick={() => {
-                      localStorage.setItem('tlb_expenses_v2', JSON.stringify(expenses));
-                      notify("Expenses Saved Successfully!");
+                      pushToCloud(sales, team, expenses);
+                      notify("Expenses Saved & Synced to Cloud!");
                       playSound(720, 0.08);
                     }}
                     className="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black flex items-center gap-1.5 transition-colors"
@@ -1188,6 +1270,7 @@ export default function App() {
                   </button>
                   <button
                     onClick={() => {
+                      isDirtyRef.current = true;
                       const newExp = {
                         id: 'exp-' + Date.now(),
                         title: 'New Expense Item',
@@ -1208,7 +1291,6 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Editable Expenses Table */}
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead>
@@ -1229,10 +1311,11 @@ export default function App() {
                             type="text"
                             value={exp.title}
                             onChange={(e) => {
+                              isDirtyRef.current = true;
                               const val = e.target.value;
                               setExpenses(expenses.map(i => i.id === exp.id ? { ...i, title: val } : i));
                             }}
-                            className="bg-transparent border-b border-transparent focus:border-yellow-400 font-semibold text-white w-full outline-none"
+                            className="bg-transparent border-b border-transparent focus:border-yellow-400 font-semibold text-white w-full min-w-[140px] outline-none"
                           />
                         </td>
                         <td className="py-2 px-2">
@@ -1240,10 +1323,11 @@ export default function App() {
                             type="text"
                             value={exp.category}
                             onChange={(e) => {
+                              isDirtyRef.current = true;
                               const val = e.target.value;
                               setExpenses(expenses.map(i => i.id === exp.id ? { ...i, category: val } : i));
                             }}
-                            className="bg-transparent text-slate-400 w-full outline-none"
+                            className="bg-transparent text-slate-400 w-full min-w-[90px] outline-none"
                           />
                         </td>
                         <td className="py-2 px-2">
@@ -1252,10 +1336,11 @@ export default function App() {
                             placeholder="Supplier"
                             value={exp.vendor}
                             onChange={(e) => {
+                              isDirtyRef.current = true;
                               const val = e.target.value;
                               setExpenses(expenses.map(i => i.id === exp.id ? { ...i, vendor: val } : i));
                             }}
-                            className="bg-transparent text-slate-400 w-full outline-none"
+                            className="bg-transparent text-slate-400 w-full min-w-[80px] outline-none"
                           />
                         </td>
                         <td className="py-2 px-2">
@@ -1263,6 +1348,7 @@ export default function App() {
                             type="text"
                             value={exp.qty}
                             onChange={(e) => {
+                              isDirtyRef.current = true;
                               const val = e.target.value;
                               setExpenses(expenses.map(i => i.id === exp.id ? { ...i, qty: val } : i));
                             }}
@@ -1274,6 +1360,7 @@ export default function App() {
                             type="number"
                             value={exp.amount}
                             onChange={(e) => {
+                              isDirtyRef.current = true;
                               const val = Number(e.target.value) || 0;
                               setExpenses(expenses.map(i => i.id === exp.id ? { ...i, amount: val } : i));
                             }}
@@ -1282,7 +1369,11 @@ export default function App() {
                         </td>
                         <td className="py-2 px-2 text-right">
                           <button
-                            onClick={() => setExpenses(expenses.filter(i => i.id !== exp.id))}
+                            onClick={() => {
+                              const nextExp = expenses.filter(i => i.id !== exp.id);
+                              setExpenses(nextExp);
+                              pushToCloud(sales, team, nextExp);
+                            }}
                             className="p-1 text-slate-500 hover:text-rose-400"
                             title="Delete Row"
                           >
@@ -1295,7 +1386,6 @@ export default function App() {
                 </table>
               </div>
 
-              {/* Total Expenses Footer & Save Button */}
               <div className="flex flex-col sm:flex-row justify-between items-center gap-3 p-3 rounded-2xl bg-slate-950 border border-slate-800">
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-xs text-slate-400">Total Logged Operational Costs:</span>
@@ -1305,8 +1395,8 @@ export default function App() {
                 </div>
                 <button
                   onClick={() => {
-                    localStorage.setItem('tlb_expenses_v2', JSON.stringify(expenses));
-                    notify("Budget & Costs Saved!");
+                    pushToCloud(sales, team, expenses);
+                    notify("Budget & Costs Synced to Cloud!");
                     playSound(720, 0.08);
                   }}
                   className="w-full sm:w-auto px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black flex items-center justify-center gap-1.5 transition-colors shadow-lg shadow-emerald-500/20"
@@ -1321,51 +1411,43 @@ export default function App() {
           {/* TAB 3: TEAM & T-SHIRTS (17 MEMBERS - MEN / WOMEN / KIDS) */}
           {adminSubTab === 'team' && (
             <div className="space-y-4">
-              {/* Category-wise Breakdown Cards for Print Shops */}
+              {/* Category-wise Breakdown Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="bg-slate-900 border border-slate-800 p-4 rounded-3xl">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-black text-white flex items-center gap-1.5">👨 Men Shirts</span>
+                    <span className="text-xs font-black text-white">👨 Men Shirts</span>
                     <span className="text-xs font-mono font-bold text-yellow-400">
                       {team.filter(m => (m.category || 'Men') === 'Men').length} pcs
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
-                    {menTally.length === 0 ? (
-                      <span className="text-[11px] text-slate-500 italic">None selected</span>
-                    ) : (
-                      menTally.map(([sz, cnt]) => (
-                        <span key={`men-${sz}`} className="px-2 py-0.5 rounded-lg bg-slate-950 border border-slate-800 text-[11px] text-slate-300">
-                          {String(sz)}: <strong className="text-yellow-400">{Number(cnt)}</strong>
-                        </span>
-                      ))
-                    )}
+                    {menTally.map(([sz, cnt]) => (
+                      <span key={`men-${sz}`} className="px-2 py-0.5 rounded-lg bg-slate-950 border border-slate-800 text-[11px] text-slate-300">
+                        {String(sz)}: <strong className="text-yellow-400">{Number(cnt)}</strong>
+                      </span>
+                    ))}
                   </div>
                 </div>
 
                 <div className="bg-slate-900 border border-slate-800 p-4 rounded-3xl">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-black text-white flex items-center gap-1.5">👩 Women Shirts</span>
+                    <span className="text-xs font-black text-white">👩 Women Shirts</span>
                     <span className="text-xs font-mono font-bold text-yellow-400">
                       {team.filter(m => m.category === 'Women').length} pcs
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
-                    {womenTally.length === 0 ? (
-                      <span className="text-[11px] text-slate-500 italic">None selected</span>
-                    ) : (
-                      womenTally.map(([sz, cnt]) => (
-                        <span key={`women-${sz}`} className="px-2 py-0.5 rounded-lg bg-slate-950 border border-slate-800 text-[11px] text-slate-300">
-                          {String(sz)}: <strong className="text-yellow-400">{Number(cnt)}</strong>
-                        </span>
-                      ))
-                    )}
+                    {womenTally.map(([sz, cnt]) => (
+                      <span key={`women-${sz}`} className="px-2 py-0.5 rounded-lg bg-slate-950 border border-slate-800 text-[11px] text-slate-300">
+                        {String(sz)}: <strong className="text-yellow-400">{Number(cnt)}</strong>
+                      </span>
+                    ))}
                   </div>
                 </div>
 
                 <div className="bg-slate-900 border border-slate-800 p-4 rounded-3xl">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-black text-white flex items-center gap-1.5">🧒 Kids Shirts</span>
+                    <span className="text-xs font-black text-white">🧒 Kids Shirts</span>
                     <span className="text-xs font-mono font-bold text-yellow-400">
                       {team.filter(m => m.category === 'Kids').length} pcs
                     </span>
@@ -1384,16 +1466,17 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Team Table with Men / Women / Kids Selector */}
+              {/* Team Table */}
               <div className="bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-5 overflow-x-auto space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
                   <div>
                     <h3 className="font-bold text-sm text-white">Team Roster & T-Shirt Sizes</h3>
-                    <p className="text-xs text-slate-400">Classify as Men, Women, or Kids for exact apparel cut & fit</p>
+                    <p className="text-xs text-slate-400">Changes auto-sync across all links and devices</p>
                   </div>
                   <div className="flex items-center gap-2 self-start sm:self-auto">
                     <button
                       onClick={() => {
+                        isDirtyRef.current = true;
                         const newMember = {
                           id: 'tm-' + Date.now(),
                           name: 'New Crew',
@@ -1404,7 +1487,9 @@ export default function App() {
                           phone: '',
                           notes: ''
                         };
-                        setTeam([...team, newMember]);
+                        const nextTeam = [...team, newMember];
+                        setTeam(nextTeam);
+                        pushToCloud(sales, nextTeam, expenses);
                       }}
                       className="px-3 py-1.5 rounded-xl bg-yellow-400 text-slate-950 text-xs font-bold flex items-center gap-1.5"
                     >
@@ -1413,8 +1498,8 @@ export default function App() {
                     </button>
                     <button
                       onClick={() => {
-                        localStorage.setItem('tlb_team_v2', JSON.stringify(team));
-                        notify("Team Roster & Sizes Saved!");
+                        pushToCloud(sales, team, expenses);
+                        notify("Team Roster & Sizes Synced to Cloud!");
                         playSound(720, 0.08);
                       }}
                       className="px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black flex items-center gap-1.5 transition-colors shadow-lg shadow-emerald-500/20"
@@ -1431,7 +1516,6 @@ export default function App() {
                       <th className="py-2.5 px-2">Name</th>
                       <th className="py-2.5 px-2">Section</th>
                       <th className="py-2.5 px-2">Shirt Size</th>
-                      <th className="py-2.5 px-2">Role & Station</th>
                       <th className="py-2.5 px-2">Notes</th>
                     </tr>
                   </thead>
@@ -1447,6 +1531,7 @@ export default function App() {
                               type="text"
                               value={member.name}
                               onChange={(e) => {
+                                isDirtyRef.current = true;
                                 const val = e.target.value;
                                 setTeam(team.map(m => m.id === member.id ? { ...m, name: val } : m));
                               }}
@@ -1458,14 +1543,12 @@ export default function App() {
                               value={member.category || 'Men'}
                               onChange={(e) => {
                                 const newCat = e.target.value;
-                                setTeam(team.map(m => {
+                                const nextTeam = team.map(m => {
                                   if (m.id !== member.id) return m;
-                                  return {
-                                    ...m,
-                                    category: newCat,
-                                    shirtSize: 'Pending'
-                                  };
-                                }));
+                                  return { ...m, category: newCat, shirtSize: 'Pending' };
+                                });
+                                setTeam(nextTeam);
+                                pushToCloud(sales, nextTeam, expenses);
                               }}
                               className="bg-slate-950 text-yellow-400 font-bold border border-slate-800 rounded px-2 py-1 outline-none"
                             >
@@ -1479,7 +1562,9 @@ export default function App() {
                               value={member.shirtSize || 'Pending'}
                               onChange={(e) => {
                                 const val = e.target.value;
-                                setTeam(team.map(m => m.id === member.id ? { ...m, shirtSize: val } : m));
+                                const nextTeam = team.map(m => m.id === member.id ? { ...m, shirtSize: val } : m);
+                                setTeam(nextTeam);
+                                pushToCloud(sales, nextTeam, expenses);
                               }}
                               className="bg-slate-950 text-yellow-400 font-bold border border-slate-800 rounded px-2 py-1 outline-none"
                             >
@@ -1491,19 +1576,17 @@ export default function App() {
                               ))}
                             </select>
                           </td>
-                          <td className="py-2.5 px-2 text-slate-400">
-                            {member.role}
-                          </td>
                           <td className="py-2.5 px-2">
                             <input
                               type="text"
                               placeholder="Add notes..."
                               value={member.notes || ''}
                               onChange={(e) => {
+                                isDirtyRef.current = true;
                                 const val = e.target.value;
                                 setTeam(team.map(m => m.id === member.id ? { ...m, notes: val } : m));
                               }}
-                              className="bg-transparent text-slate-400 w-full outline-none"
+                              className="bg-transparent text-slate-400 w-full min-w-[120px] outline-none"
                             />
                           </td>
                         </tr>
@@ -1512,12 +1595,11 @@ export default function App() {
                   </tbody>
                 </table>
 
-                {/* Save Team Bottom Action */}
                 <div className="pt-2 flex justify-end">
                   <button
                     onClick={() => {
-                      localStorage.setItem('tlb_team_v2', JSON.stringify(team));
-                      notify("Team & Shirts Saved Successfully!");
+                      pushToCloud(sales, team, expenses);
+                      notify("Team & Shirts Saved & Synced!");
                       playSound(720, 0.08);
                     }}
                     className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition-all active:scale-95"
@@ -1534,8 +1616,8 @@ export default function App() {
           {adminSubTab === 'sales' && (
             <div className="bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-5">
               <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
-                <h3 className="font-bold text-sm text-white">Full Event Sales Log ({sales.length} transactions)</h3>
-                <span className="text-xs font-mono text-slate-400">Total: MVR {metrics.grossRevenue.toLocaleString()}</span>
+                <h3 className="font-bold text-sm text-white">Event Sales Log ({sales.length})</h3>
+                <span className="text-xs font-mono text-yellow-400 font-bold">Total: MVR {metrics.grossRevenue.toLocaleString()}</span>
               </div>
 
               {sales.length === 0 ? (
@@ -1551,14 +1633,14 @@ export default function App() {
                         <th className="py-2 px-2">Tender</th>
                         <th className="py-2 px-2">Cups</th>
                         <th className="py-2 px-2">Total</th>
-                        <th className="py-2 px-2 text-right">Action</th>
+                        <th className="py-2 px-2 text-right">Void</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800/60">
                       {sales.map((s) => (
                         <tr key={s.id} className="hover:bg-slate-800/30">
                           <td className="py-2 px-2 font-mono font-bold text-slate-300">#{s.orderNumber}</td>
-                          <td className="py-2 px-2 text-slate-400">{s.timestamp}</td>
+                          <td className="py-2 px-2 text-slate-400 whitespace-nowrap">{s.timestamp}</td>
                           <td className="py-2 px-2 font-semibold text-white">{s.cashier}</td>
                           <td className="py-2 px-2">
                             <span className="px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-[11px] text-slate-300">
@@ -1566,11 +1648,11 @@ export default function App() {
                             </span>
                           </td>
                           <td className="py-2 px-2 font-mono">{s.cupsTotal}</td>
-                          <td className="py-2 px-2 font-mono font-black text-yellow-400">MVR {s.grossTotal}</td>
+                          <td className="py-2 px-2 font-mono font-black text-yellow-400 whitespace-nowrap">MVR {s.grossTotal}</td>
                           <td className="py-2 px-2 text-right">
                             <button
                               onClick={() => handlePromptDeleteOrder(s)}
-                              className="text-slate-500 hover:text-rose-400"
+                              className="text-slate-500 hover:text-rose-400 p-1"
                               title="Delete Transaction"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -1587,7 +1669,7 @@ export default function App() {
         </main>
       )}
 
-      {/* Password Modal (PIN: 1234 - Auto Unlocks on typing 1234) */}
+      {/* Password Modal (PIN: 1234 - Auto Unlocks on 4th digit) */}
       {showPinModal && (
         <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-xs w-full shadow-2xl text-center">
@@ -1653,7 +1735,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* Order Details Card */}
             <div className="bg-slate-950 border border-slate-800/90 rounded-2xl p-3.5 my-3 space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-mono font-bold text-yellow-400">Order #{deleteConfirmation.order.orderNumber}</span>
@@ -1674,7 +1755,6 @@ export default function App() {
               )}
             </div>
 
-            {/* Action Buttons */}
             <div className="flex gap-2.5 pt-1">
               <button
                 type="button"
@@ -1690,66 +1770,6 @@ export default function App() {
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Confirm Void</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Deploy & Open Anywhere Modal */}
-      {showDeployModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-6 max-w-lg w-full shadow-2xl text-left flex flex-col max-h-[90vh]">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-yellow-400/10 border border-yellow-400/30 flex items-center justify-center text-yellow-400">
-                  <Smartphone className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-black text-base sm:text-lg text-white">Shareable Production Link</h3>
-                  <p className="text-xs text-slate-400">For iPad, iPhone or Android on race day</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowDeployModal(false)}
-                className="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center font-bold text-sm"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="mt-4 space-y-4 overflow-y-auto pr-1 text-xs sm:text-sm text-slate-300">
-              <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
-                <span className="text-[10px] uppercase font-black tracking-wider text-yellow-400 block">
-                  Step 1: Use Your Main Vercel Production Domain
-                </span>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Do not share the long preview link with random characters (like <span className="font-mono text-rose-300">lemonade-bros-3fq1ms43e...</span>) because Vercel locks preview links behind a login screen.
-                </p>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  Instead, go to your <strong className="text-white">Vercel Project Dashboard → Domains</strong> and copy your clean production link:
-                </p>
-                <div className="p-2.5 rounded-xl bg-slate-900 border border-yellow-400/30 font-mono text-xs text-yellow-300 text-center">
-                  https://lemonade-bros-pos.vercel.app
-                </div>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
-                <span className="text-[10px] uppercase font-black tracking-wider text-emerald-400 block">
-                  Step 2: Add to Phone / iPad Home Screen
-                </span>
-                <p className="text-xs text-slate-400">
-                  Open the production URL in Safari on your iPhone or iPad, tap <strong className="text-white">Share → Add to Home Screen</strong>. It will run fullscreen like a native POS app!
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-4 pt-3 border-t border-slate-800 flex justify-end">
-              <button
-                onClick={() => setShowDeployModal(false)}
-                className="px-4 py-2 rounded-xl bg-yellow-400 text-slate-950 font-black text-xs"
-              >
-                Got It
               </button>
             </div>
           </div>
